@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:background="@color/transparent_color"
+    android:paddingTop="@dimen/padding_5"
+    android:paddingBottom="@dimen/padding_5"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/li_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/cover_img"
+            android:layout_width="@dimen/margin_60"
+            android:layout_height="@dimen/margin_60"
+            app:riv_corner_radius="@dimen/margin_10"
+            android:layout_gravity="center"
+            android:src="@drawable/bg_round_rect"
+            />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/margin_15"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/saved_song"
+                android:textColor="@color/white_color"
+                android:textSize="@dimen/text_15"
+                />
+            <TextView
+                android:id="@+id/sub_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey_dark"
+                />
+            <TextView
+                android:id="@+id/song_cnt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/grey_dark"
+                />
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/more"
+            android:layout_width="@dimen/margin_30"
+            android:layout_height="@dimen/margin_30"
+            android:padding="@dimen/margin_5"
+            android:layout_gravity="center"
+            android:src="@drawable/more"
+            app:tint="@color/white_color" />
+    </LinearLayout>
+
+
+</LinearLayout>

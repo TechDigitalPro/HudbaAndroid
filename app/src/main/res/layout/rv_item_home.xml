@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:id="@+id/gc_relative_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_7"
+        android:layout_marginBottom="@dimen/margin_5">
+        <com.uru.hudba.view.CustomRoundSquireImageView
+            android:id="@+id/rm_image"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:src="@drawable/aaa"
+            android:layout_gravity="center" />
+
+        <LinearLayout
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/margin_5"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/rm_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="left"
+                android:text="mosho"
+                android:singleLine="true"
+                android:textColor="@color/white_color"
+                android:textSize="@dimen/text_15" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

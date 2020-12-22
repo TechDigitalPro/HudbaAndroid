@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/background_orange"
+        android:scaleType="centerCrop"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/margin_20">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10"
+            android:layout_marginBottom="@dimen/margin_10"
+            android:layout_marginLeft="@dimen/margin_20"
+            android:layout_marginRight="@dimen/margin_20"
+            android:padding="@dimen/margin_20"
+            android:gravity="center"
+            android:textSize="@dimen/text_25"
+            android:textStyle="bold"
+            android:textColor="@color/white_color"
+            android:text="One account, all your music."/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/margin_20"
+            android:layout_marginBottom="@dimen/margin_20">
+            <Button
+                android:id="@+id/auth_facebook_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_5"
+                android:layout_marginBottom="@dimen/margin_5"
+                android:background="@drawable/bk_facebook_button_primary"
+                android:text="Sign in with Facebook"
+                android:textAllCaps="false"
+                android:textColor="@color/white_color"
+                android:textSize="@dimen/text_15"/>
+            <Button
+                android:id="@+id/auth_signup_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_5"
+                android:layout_marginBottom="@dimen/margin_5"
+                android:background="@drawable/bk_signup_button_primary"
+                android:text="Sign up with Hudba"
+                android:textAllCaps="false"
+                android:textColor="@color/white_color"
+                android:textSize="@dimen/text_15"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/padding_10"
+                android:gravity="center"
+                android:textSize="@dimen/text_18"
+                android:textColor="@color/white_color"
+                android:text="Already have an account ?"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/auth_login_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_5"
+                android:layout_marginBottom="@dimen/margin_5"
+                android:background="@drawable/bk_login_button_white"
+                android:text="Log in"
+                android:textAllCaps="false"
+                android:textColor="@color/black_color"
+                android:textSize="@dimen/text_15"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

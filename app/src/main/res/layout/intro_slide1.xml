@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_purple">
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/intro_image_size"
+            android:layout_height="@dimen/intro_image_size"
+            android:src="@drawable/intro_slide_1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unlimited music. Free. Forever."
+            android:gravity="center"
+            android:textColor="@color/white_color"
+            android:textSize="@dimen/intro_title_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_20"
+            android:padding="@dimen/padding_10"
+            android:gravity="center"
+            android:textColor="@color/white_color"
+            android:textSize="@dimen/intro_text_size"
+            android:text="Over 150 million songs, your own playlists and favorite artists."/>
+
+    </LinearLayout>
+</RelativeLayout>

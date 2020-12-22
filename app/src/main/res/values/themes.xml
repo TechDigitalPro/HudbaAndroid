@@ -1,0 +1,54 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Hudba" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/black_color</item>
+        <item name="colorPrimaryVariant">@color/black_color</item>
+        <item name="colorOnPrimary">@color/white_color</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:autofilledHighlight" tools:ignore="NewApi">@color/transparent_color</item>
+        <!-- Customize your theme here. -->
+    </style>
+    <style name="TextLabel">
+        <item name="android:textColorHint">@color/grey_dark</item>
+        <item name="android:textSize">@dimen/text_18</item>
+        <item name="colorPrimary">@color/white_color</item>
+        <item name="colorPrimaryDark">@color/white_color</item>
+        <item name="colorAccent">@color/white_color</item>
+        <item name="colorControlNormal">@color/grey_dark</item>
+        <item name="colorControlActivated">@color/white_color</item>
+        <item name="colorError">@color/red_dark</item>
+        <item name="android:autofilledHighlight" tools:ignore="NewApi">@color/transparent_color</item>
+    </style>
+    <style name="BottomNavigationView" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">10sp</item>
+    </style>
+    <style name="BottomNavigationView.Active" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">@color/white_color</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="DialogTheme" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:animation">@style/DialogAnimation</item>
+    </style>
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/push_bottom_in</item>
+        <item name="android:windowExitAnimation">@anim/push_bottom_out</item>
+    </style>
+    <style name="SeekbarTheme" parent="Theme.AppCompat.Light">
+        <item name="android:colorControlActivated" tools:targetApi="lollipop">#4994F9</item>
+        <item name="android:colorControlNormal" tools:targetApi="lollipop">#615F5F</item>
+    </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="SearchViewStyle" parent="Base.ThemeOverlay.AppCompat.Light">
+        <item name="android:editTextColor">@color/white_color</item>
+        <item name="android:textColorHint">@color/bottom_nav_normal_color</item>
+    </style>
+</resources>
