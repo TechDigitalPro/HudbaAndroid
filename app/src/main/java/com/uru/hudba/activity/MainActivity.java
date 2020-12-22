@@ -201,6 +201,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mini_pause.setOnClickListener(this);
         songSlideView = new SlideUp(detail_panel);
         mini_panel.setOnClickListener(this);
+        youtubeView.setHovered(true);
         youtubeView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
             @Override
             public void onReady(@NonNull YouTubePlayer youTubePlayer) {
@@ -233,6 +234,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 min_progress.setMax((int) duration);
                 detail_seekbar.setMax((int) duration);
                 detail_end_time.setText(String.format(time_pattern, new Object[]{Long.valueOf(TimeUnit.MILLISECONDS.toMinutes((long) duration * 1000)), Long.valueOf(TimeUnit.MILLISECONDS.toSeconds((long) duration* 1000) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) duration* 1000)))}));
+            }
+
+            @Override
+            public void onStateChange(@NotNull YouTubePlayer youTubePlayer, @NotNull PlayerConstants.PlayerState state) {
+                super.onStateChange(youTubePlayer, state);
+                if(state == PlayerConstants.PlayerState.PAUSED){
+                    Constant.isPlayed = false;
+                    detail_pause.setImageResource(R.drawable.ic_play);
+                    mini_pause.setImageResource(R.drawable.ic_play);
+                    Intent intent = new Intent("com.uru.hdubaService");
+                    intent.putExtra("noti_play", true);
+                    sendBroadcast(intent);
+                }else if(state == PlayerConstants.PlayerState.PLAYING){
+                    Constant.isPlayed = true;
+                    detail_pause.setImageResource(R.drawable.ic_pause);
+                    mini_pause.setImageResource(R.drawable.ic_pause);
+                    Intent intent = new Intent("com.uru.hdubaService");
+                    intent.putExtra("noti_play", true);
+                    sendBroadcast(intent);
+                }
+
+
             }
         });
         detail_pause.setOnClickListener(this);
@@ -335,7 +358,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
 
 
-
+    /********************file download module**********************/
     private void downloadInit(){
         PRDownloader.initialize(getApplicationContext());
         PRDownloaderConfig config = PRDownloaderConfig.newBuilder()
@@ -430,435 +453,112 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
                 });
     }
-    private void nextPlay(){
-        if(!Constant.isRepeat){
-            if(Constant.playPos < Constant.arrayList_play.size()-1){
-                initPlayer(Constant.playPos + 1);
-            }
-        }else{
-            initPlayer(Constant.playPos);
-        }
+    @Override
+    public void downloadVideoFinish(String s) {
+        downloadImageRequest(cur_download_track.getCover_image(), cur_download_trackid);
     }
-    private void prevPlay(){
-        if(!Constant.isRepeat){
-            if(Constant.playPos != 0){
-                initPlayer(Constant.playPos - 1);
-            }
-        }else{
-            initPlayer(Constant.playPos);
-        }
-    }
-
-    public void setTrackList(List<TrackModel> trackList){
-        Constant.arrayList_play.clear();
-        Constant.arrayList_play.addAll(trackList);
-    }
-    private void stopPlayer(){
-        if(cur_track != null){
-            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
-                if(mYouTubePlayer != null){
-                    if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING){
-                        mYouTubePlayer.pause();
-                    }
-                }
-            }else{
-                Intent intent = new Intent(MainActivity.this, NotiService.class);
-                intent.setAction(NotiService.ACTION_PAUSE);
-                startService(intent);
-            }
-        }
-    }
-    public void initPlayer(int track_pos){
-        if(!Constant.arrayList_play.get(track_pos).getTrack_id().equalsIgnoreCase(Constant.cur_track_id)){
-            stopPlayer();
-        }
-        try {
-            cur_track = Constant.arrayList_play.get(track_pos);
-
-            if(!Constant.cur_track_id.equalsIgnoreCase(cur_track.getTrack_id())){
-
-
-
-                Constant.playPos = track_pos;
-                Constant.cur_track_id = cur_track.getTrack_id();
-                Constant.cur_videoId = cur_track.getVideoId();
-
-                mini_pause.setImageResource(R.drawable.ic_play);
-                detail_pause.setImageResource(R.drawable.ic_play);
-                txt_mini_title.setText(cur_track.getTitle());
-                txt_mini_artist.setText(cur_track.getArtist_name());
-                min_progress.setProgress(0);
-                detail_seekbar.setProgress(0);
-                min_loading.setVisibility(View.VISIBLE);
-
-                detail_title.setText(cur_track.getTitle());
-                detail_artist.setText(cur_track.getArtist_name());
-                if(!TextUtils.isEmpty(cur_track.getFavorite())){
-                    btn_detail_downstatus.setImageResource(R.drawable.favorite_heart);
-                }else{
-                    btn_detail_downstatus.setImageResource(R.drawable.unfavorite_heart);
-                }
-
-                if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
-                    youtubeView.setVisibility(View.INVISIBLE);
-                    detail_cover_image.setVisibility(View.VISIBLE);
-                    String path = getFilesDir().getAbsolutePath() + File.separator + "image"  + File.separator;
-                    path = path + cur_track.getTrack_id() + ".jpg";
-                    File imgFile = new File(path);
-                    Glide.with(MainActivity.this)
-                            .load(imgFile)
-                            .override(70, 70)
-                            .into(mini_image);
-                    Glide.with(MainActivity.this)
-                            .load(imgFile)
-                            .into(detail_cover_image);
-                }else{
-                    String cur_playing_mode = App.readSharedSetting(PRE_PLAYING_MODE, "photo");
-                    Log.e("playmode:2", cur_playing_mode);
-                    if(cur_playing_mode.equalsIgnoreCase("photo")){
-                        youtubeView.setVisibility(View.INVISIBLE);
-                        detail_cover_image.setVisibility(View.VISIBLE);
-                    }else{
-                        youtubeView.setVisibility(View.VISIBLE);
-                        detail_cover_image.setVisibility(View.GONE);
-                    }
-
-                    if (!TextUtils.isEmpty(cur_track.getCover_image())) {
-                        try {
-                            Glide.with(MainActivity.this)
-                                    .load(cur_track.getCover_image())
-                                    .override(70, 70)
-                                    .into(mini_image);
-                            Glide.with(MainActivity.this)
-                                    .load(cur_track.getCover_image())
-                                    .into(detail_cover_image);
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                if(!songSlideView.isVisible()){
-                    mini_panel.setVisibility(View.VISIBLE);
-                    mBottomNav.setVisibility(View.VISIBLE);
-                }
-
-
-
-                isPlaying = false;
-                Constant.isPlayed = false;
-
-
-
-                if(!App.isNetworkAvailable(getApplicationContext())){
-                    if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
-                        Intent intent = new Intent(MainActivity.this, NotiService.class);
-                        intent.setAction(NotiService.ACTION_PLAY);
-                        startService(intent);
-                    }else{
-                        showErrorMessages("To listen this song, you must be connected. If you download it, it will be available also offline");
-                        return;
-                    }
-                }else{
-                    if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
-                        Intent intent = new Intent(MainActivity.this, NotiService.class);
-                        intent.setAction(NotiService.ACTION_PLAY);
-                        startService(intent);
-                    }else{
-                        if(!TextUtils.isEmpty(Constant.cur_videoId) && Constant.cur_videoId != null){
-                            if(mYouTubePlayer != null){
-                                mYouTubePlayer.loadVideo(Constant.cur_videoId, 0);
-                                Intent intent = new Intent(MainActivity.this, NotiService.class);
-                                intent.setAction(NotiService.ACTION_PLAY);
-                                startService(intent);
-                            }
-                        }else{
-                            getVideoID(cur_track.getTrack_id(), cur_track.getTitle(), cur_track.getArtist_name(), track_pos);
-                            return;
-                        }
-                    }
-                }
-                if(current_page.equalsIgnoreCase("track_detail")){
-                    TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-                    if(fragment.getAdapter() != null){
-                        fragment.getAdapter().setPosition(track_pos, "common");
-                        fragment.getAdapter().setChecked(true, "common");
-                        fragment.getAdapter().notifyDataSetChanged();
-                    }
-                }
-                if(current_page.equalsIgnoreCase("saved_song")){
-                    SavedFragment fragment = (SavedFragment) getCurrentFragment();
-                    if(fragment.getAdapter() != null){
-                        fragment.getAdapter().setPosition(track_pos, "common");
-                        fragment.getAdapter().setChecked(true, "common");
-                        fragment.getAdapter().notifyDataSetChanged();
-                    }
-                }
-                if(current_page.equalsIgnoreCase("playlist_track_detail")){
-                    PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-                    if(fragment.getAdapter() != null){
-                        fragment.getAdapter().setPosition(track_pos, "common");
-                        fragment.getAdapter().setChecked(true, "common");
-                        fragment.getAdapter().notifyDataSetChanged();
-                    }
-                }
-                if(current_page.equalsIgnoreCase("search")){
-                    SearchFragment fragment = (SearchFragment) getCurrentFragment();
-                    if(fragment.getAdapter() != null){
-                        fragment.getAdapter().setPosition(track_pos, "common");
-                        fragment.getAdapter().setChecked(true, "common");
-                        fragment.getAdapter().notifyDataSetChanged();
-                    }
-                }
-                if(current_page.equalsIgnoreCase("search_detail")){
-                    SearchDetailFragment fragment = (SearchDetailFragment) getCurrentFragment();
-                    if(fragment.getAdapter() != null){
-                        fragment.getAdapter().setPosition(track_pos, "common");
-                        fragment.getAdapter().setChecked(true, "common");
-                        fragment.getAdapter().notifyDataSetChanged();
-                    }
-                }
-
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    @Override
+    public void updateProgress(int pro) {
 
     }
-    private void getVideoID(String id, String track_name, String artist_name, int pos){
-        String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
-        if (App.isNetworkAvailable(getApplicationContext())) {
-            Ion.with(getApplicationContext())
-                    .load(GlobalConstants.SEARCH_VIDEOID)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("track_id", id)
-                    .setBodyParameter("track_name", track_name)
-                    .setBodyParameter("artist_name", artist_name)
-                    .setBodyParameter("memberKey", member_key)
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            if (e == null) {
-                                try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        JSONObject api_result = resultObj.getJSONObject("api_result");
-                                        Constant.cur_videoId = api_result.getString("videoId");
-                                        if(mYouTubePlayer != null){
-                                            if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING){
-                                                mYouTubePlayer.pause();
-                                            }
-                                            mYouTubePlayer.loadVideo(Constant.cur_videoId, 0);
-                                            if(current_page.equalsIgnoreCase("track_detail")){
-                                                TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-                                                if(fragment.getAdapter() != null){
-                                                    fragment.getAdapter().setPosition(pos, "common");
-                                                    fragment.getAdapter().setChecked(true, "common");
-                                                    fragment.getAdapter().notifyDataSetChanged();
-                                                }
-                                            }
-                                            if(current_page.equalsIgnoreCase("saved_song")){
-                                                SavedFragment fragment = (SavedFragment) getCurrentFragment();
-                                                if(fragment.getAdapter() != null){
-                                                    fragment.getAdapter().setPosition(pos, "common");
-                                                    fragment.getAdapter().setChecked(true, "common");
-                                                    fragment.getAdapter().notifyDataSetChanged();
-                                                }
-                                            }
-                                            if(current_page.equalsIgnoreCase("playlist_track_detail")){
-                                                PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-                                                if(fragment.getAdapter() != null){
-                                                    fragment.getAdapter().setPosition(pos, "common");
-                                                    fragment.getAdapter().setChecked(true, "common");
-                                                    fragment.getAdapter().notifyDataSetChanged();
-                                                }
-                                            }
-                                            if(current_page.equalsIgnoreCase("search")){
-                                                SearchFragment fragment = (SearchFragment) getCurrentFragment();
-                                                if(fragment.getAdapter() != null){
-                                                    fragment.getAdapter().setPosition(pos, "common");
-                                                    fragment.getAdapter().setChecked(true, "common");
-                                                    fragment.getAdapter().notifyDataSetChanged();
-                                                }
-                                            }
-                                            if(current_page.equalsIgnoreCase("search_detail")){
-                                                SearchDetailFragment fragment = (SearchDetailFragment) getCurrentFragment();
-                                                if(fragment.getAdapter() != null){
-                                                    fragment.getAdapter().setPosition(pos, "common");
-                                                    fragment.getAdapter().setChecked(true, "common");
-                                                    fragment.getAdapter().notifyDataSetChanged();
-                                                }
-                                            }
-                                            Intent intent = new Intent(MainActivity.this, NotiService.class);
-                                            intent.setAction(NotiService.ACTION_PLAY);
-                                            startService(intent);
-                                        }
-                                    } else {
-                                        showErrorMessages(resultObj.getString("err_msg"));
-                                    }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
-                                    Constant.cur_videoId = "";
-                                    showErrorMessages("Couldn't find video");
-                                }
-                            } else {
-                                showErrorMessages(R.string.txt_server_error);
-                            }
-                        }
-                    });
-        } else {
-            showErrorMessages(R.string.txt_network_error);
-        }
-    }
-    public void setFavorite(String favorite, @NotNull String type, int list_pos){
-        if(type.equalsIgnoreCase("play_view")){
-            if(TextUtils.isEmpty(favorite)){
-                btn_detail_downstatus.setImageResource(R.drawable.unfavorite_heart);
-            }else{
-                btn_detail_downstatus.setImageResource(R.drawable.favorite_heart);
-            }
-            cur_track.setFavorite(favorite);
-            Constant.arrayList_play.set(Constant.playPos, cur_track);
-            try {
-                HomeFragment homeFragment = (HomeFragment) getCurrentFragment();
-                if(current_playing_type.equalsIgnoreCase("home")){
-                    homeFragment.update_trackList("home", Constant.playPos, cur_track);
-                }else if(current_playing_type.equalsIgnoreCase("favorite")){
-                    homeFragment.update_trackList("favorite", Constant.playPos, cur_track);
-                }else if(current_playing_type.equalsIgnoreCase("trending")){
-                    homeFragment.update_trackList("trending", Constant.playPos, cur_track);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }else if(type.equalsIgnoreCase("list_view")){
-            if(current_page.equalsIgnoreCase("saved_song")){
-                SavedFragment savedFragment =  (SavedFragment) getCurrentFragment();
-                savedFragment.updateAdapter(list_pos, favorite);
-            }else if(current_page.equalsIgnoreCase("playlist_track_detail")){
-                PlaylistTrackDetailFragment playlistTrackDetailFragment =  (PlaylistTrackDetailFragment) getCurrentFragment();
-                playlistTrackDetailFragment.updateAdapter(list_pos, null, "add");
-            }else{
-                TrackDetailFragment detailAlbumFragment =  (TrackDetailFragment) getCurrentFragment();
-                detailAlbumFragment.updateAdapter(list_pos, favorite);
-            }
-        }
+    @Override
+    public void downloadVideoFail(String fail) {
+
         if(current_page.equalsIgnoreCase("track_detail")){
             TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-            if(cur_track != null){
-                if(!current_playing_type.equalsIgnoreCase("track") && !current_playing_type.equalsIgnoreCase("detail")){
-                    fragment.updateAdapter(list_pos, favorite);
-                }else{
-                    fragment.updateAdapter(Constant.playPos, favorite);
-                }
-            }else{
-                fragment.updateAdapter(list_pos, favorite);
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
             }
         }
         if(current_page.equalsIgnoreCase("saved_song")){
             SavedFragment fragment = (SavedFragment) getCurrentFragment();
-            if(cur_track != null){
-                if(!current_playing_type.equalsIgnoreCase("track") && !current_playing_type.equalsIgnoreCase("detail")){
-                    fragment.updateAdapter(list_pos, favorite);
-                }else{
-                    fragment.updateAdapter(Constant.playPos, favorite);
-                }
-            }else{
-                fragment.updateAdapter(list_pos, favorite);
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
             }
         }
-
-
-
-    }
-    public void add_favorite(TrackModel cur_track, String type, int list_pos){
-        String user_id = App.readSharedSetting(PRE_USER_ID, "");
-        if (App.isNetworkAvailable(getApplicationContext())) {
-            Ion.with(getApplicationContext())
-                    .load(GlobalConstants.ADD_FAVORITE)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("user_id", user_id)
-                    .setBodyParameter("p_listid", cur_track.getP_listid())
-                    .setBodyParameter("track_id", cur_track.getTrack_id())
-                    .setBodyParameter("title", cur_track.getTitle())
-                    .setBodyParameter("artist_id", cur_track.getArtist_id())
-                    .setBodyParameter("artist_name", cur_track.getArtist_name())
-                    .setBodyParameter("cover_image", cur_track.getCover_image())
-                    .setBodyParameter("album_id", cur_track.getAlbum_id())
-                    .setBodyParameter("album_name", cur_track.getAlbum_name())
-                    .setBodyParameter("videoId", cur_track.getVideoId())
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            if (e == null) {
-                                try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        String tmp_favorite = "";
-                                        if(resultObj.getString("api_result").equalsIgnoreCase("1")){
-                                            tmp_favorite = "favorite";
-                                        }
-                                        if(type.equalsIgnoreCase("play_view")){
-                                            setFavorite(tmp_favorite, "play_view", Constant.playPos);
-                                        }else{
-                                            setFavorite(tmp_favorite, type, list_pos);
-                                        }
-                                    } else {
-                                        showErrorMessages(resultObj.getString("err_msg"));
-                                    }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
-                                }
-                            } else {
-                                showErrorMessages(R.string.txt_server_error);
-                            }
-                        }
-                    });
-        } else {
-            showErrorMessages(R.string.txt_network_error);
+        if(current_page.equalsIgnoreCase("playlist_track_detail")){
+            PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
         }
-    }
-    public void getVID_download(TrackModel trackModel, String type, int list_pos, String action){
-        String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
-        if (App.isNetworkAvailable(getApplicationContext())) {
-            Ion.with(getApplicationContext())
-                    .load(GlobalConstants.SEARCH_VIDEOID)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("track_id", trackModel.getTrack_id())
-                    .setBodyParameter("track_name", trackModel.getTitle())
-                    .setBodyParameter("artist_name", trackModel.getArtist_name())
-                    .setBodyParameter("memberKey", member_key)
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            if (e == null) {
-                                try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        JSONObject api_result = resultObj.getJSONObject("api_result");
-                                        String cvid = api_result.getString("videoId");
-                                        if(!TextUtils.isEmpty(cvid) && cvid != null){
-                                            add_download(trackModel, cvid, type, list_pos, action);
-                                        }
-                                    } else {
-                                        showErrorMessages(resultObj.getString("err_msg"));
-                                    }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
-                                    showErrorMessages("Couldn't find video");
-                                }
-                            } else {
-                                showErrorMessages(R.string.txt_server_error);
-                            }
-                        }
-                    });
-        } else {
-            showErrorMessages(R.string.txt_network_error);
+        if(current_page.equalsIgnoreCase("search")){
+            SearchFragment fragment = (SearchFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
         }
+        if(current_page.equalsIgnoreCase("search_detail")){
+            SearchFragment fragment = (SearchFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        Constant.cur_download_trackid = "";
+        Constant.downloading_list.remove(0);
+        if(Constant.downloading_list.size()>0){
+            download_action(Constant.downloading_list.get(0));
+        }
+        showErrorMessages("File Download fail: Please try again");
     }
+    @Override
+    public void getLinkSuccess(String linkMusic) {
+        downloadVideoRequest(linkMusic, cur_download_trackid);
+    }
+    @Override
+    public void getLinkFail() {
+
+        if(current_page.equalsIgnoreCase("track_detail")){
+            TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        if(current_page.equalsIgnoreCase("saved_song")){
+            SavedFragment fragment = (SavedFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        if(current_page.equalsIgnoreCase("playlist_track_detail")){
+            PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        if(current_page.equalsIgnoreCase("search")){
+            SearchFragment fragment = (SearchFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        if(current_page.equalsIgnoreCase("search_detail")){
+            SearchFragment fragment = (SearchFragment) getCurrentFragment();
+            if(fragment.getAdapter() != null){
+                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
+                fragment.getAdapter().notifyDataSetChanged();
+            }
+        }
+        Constant.cur_download_trackid = "";
+        Constant.downloading_list.remove(0);
+        if(Constant.downloading_list.size()>0){
+            download_action(Constant.downloading_list.get(0));
+        }
+
+        showErrorMessages("FileSource Get fail: Please try again");
+
+    }
+
+    /*************************download***************************************/
     private void download_action(DownloadModel downloadModel){
         cur_download_trackid = downloadModel.getTrackModel().getTrack_id();
         cur_download_track = downloadModel.getTrackModel();
@@ -1053,6 +753,486 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }
         }
     }
+
+    /***************player**********************/
+    public void setTrackList(List<TrackModel> trackList){
+        Constant.arrayList_play.clear();
+        Constant.arrayList_play.addAll(trackList);
+    }
+    public void initPlayer(int track_pos){
+        if(!Constant.arrayList_play.get(track_pos).getTrack_id().equalsIgnoreCase(Constant.cur_track_id)){
+            stopPlayer();
+        }
+        try {
+            cur_track = Constant.arrayList_play.get(track_pos);
+
+            if(!Constant.cur_track_id.equalsIgnoreCase(cur_track.getTrack_id())){
+
+
+
+                Constant.playPos = track_pos;
+                Constant.cur_track_id = cur_track.getTrack_id();
+                Constant.cur_videoId = cur_track.getVideoId();
+
+                mini_pause.setImageResource(R.drawable.ic_play);
+                detail_pause.setImageResource(R.drawable.ic_play);
+                txt_mini_title.setText(cur_track.getTitle());
+                txt_mini_artist.setText(cur_track.getArtist_name());
+                min_progress.setProgress(0);
+                detail_seekbar.setProgress(0);
+                min_loading.setVisibility(View.VISIBLE);
+
+                detail_title.setText(cur_track.getTitle());
+                detail_artist.setText(cur_track.getArtist_name());
+                if(!TextUtils.isEmpty(cur_track.getFavorite())){
+                    btn_detail_downstatus.setImageResource(R.drawable.favorite_heart);
+                }else{
+                    btn_detail_downstatus.setImageResource(R.drawable.unfavorite_heart);
+                }
+
+                if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
+                    youtubeView.setVisibility(View.INVISIBLE);
+                    detail_cover_image.setVisibility(View.VISIBLE);
+                    String path = getFilesDir().getAbsolutePath() + File.separator + "image"  + File.separator;
+                    path = path + cur_track.getTrack_id() + ".jpg";
+                    File imgFile = new File(path);
+                    Glide.with(MainActivity.this)
+                            .load(imgFile)
+                            .override(70, 70)
+                            .into(mini_image);
+                    Glide.with(MainActivity.this)
+                            .load(imgFile)
+                            .into(detail_cover_image);
+                }else{
+                    String cur_playing_mode = App.readSharedSetting(PRE_PLAYING_MODE, "photo");
+                    Log.e("playmode:2", cur_playing_mode);
+                    if(cur_playing_mode.equalsIgnoreCase("photo")){
+                        youtubeView.setVisibility(View.INVISIBLE);
+                        detail_cover_image.setVisibility(View.VISIBLE);
+                    }else{
+                        youtubeView.setVisibility(View.VISIBLE);
+                        detail_cover_image.setVisibility(View.GONE);
+                    }
+
+                    if (!TextUtils.isEmpty(cur_track.getCover_image())) {
+                        try {
+                            Glide.with(MainActivity.this)
+                                    .load(cur_track.getCover_image())
+                                    .override(70, 70)
+                                    .into(mini_image);
+                            Glide.with(MainActivity.this)
+                                    .load(cur_track.getCover_image())
+                                    .into(detail_cover_image);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                if(!songSlideView.isVisible()){
+                    mini_panel.setVisibility(View.VISIBLE);
+                    mBottomNav.setVisibility(View.VISIBLE);
+                }
+
+
+
+                isPlaying = false;
+                Constant.isPlayed = false;
+
+
+
+                if(!App.isNetworkAvailable(getApplicationContext())){
+                    if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
+                        Intent intent = new Intent(MainActivity.this, NotiService.class);
+                        intent.setAction(NotiService.ACTION_PLAY);
+                        startService(intent);
+                    }else{
+                        showErrorMessages("To listen this song, you must be connected. If you download it, it will be available also offline");
+                        return;
+                    }
+                }else{
+                    if(!TextUtils.isEmpty(cur_track.getFavorite()) && cur_track.getFavorite().contains("download")){
+                        Intent intent = new Intent(MainActivity.this, NotiService.class);
+                        intent.setAction(NotiService.ACTION_PLAY);
+                        startService(intent);
+                    }else{
+                        if(!TextUtils.isEmpty(Constant.cur_videoId) && Constant.cur_videoId != null){
+                            if(mYouTubePlayer != null){
+                                mYouTubePlayer.loadVideo(Constant.cur_videoId, 0);
+                                Intent intent = new Intent(MainActivity.this, NotiService.class);
+                                intent.setAction(NotiService.ACTION_PLAY);
+                                startService(intent);
+                            }
+                        }else{
+                            getVideoID(cur_track.getTrack_id(), cur_track.getTitle(), cur_track.getArtist_name(), track_pos);
+                            return;
+                        }
+                    }
+                }
+                if(current_page.equalsIgnoreCase("track_detail")){
+                    TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
+                    if(fragment.getAdapter() != null){
+                        fragment.getAdapter().setPosition(track_pos, "common");
+                        fragment.getAdapter().setChecked(true, "common");
+                        fragment.getAdapter().notifyDataSetChanged();
+                    }
+                }
+                if(current_page.equalsIgnoreCase("saved_song")){
+                    SavedFragment fragment = (SavedFragment) getCurrentFragment();
+                    if(fragment.getAdapter() != null){
+                        fragment.getAdapter().setPosition(track_pos, "common");
+                        fragment.getAdapter().setChecked(true, "common");
+                        fragment.getAdapter().notifyDataSetChanged();
+                    }
+                }
+                if(current_page.equalsIgnoreCase("playlist_track_detail")){
+                    PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
+                    if(fragment.getAdapter() != null){
+                        fragment.getAdapter().setPosition(track_pos, "common");
+                        fragment.getAdapter().setChecked(true, "common");
+                        fragment.getAdapter().notifyDataSetChanged();
+                    }
+                }
+                if(current_page.equalsIgnoreCase("search")){
+                    SearchFragment fragment = (SearchFragment) getCurrentFragment();
+                    if(fragment.getAdapter() != null){
+                        fragment.getAdapter().setPosition(track_pos, "common");
+                        fragment.getAdapter().setChecked(true, "common");
+                        fragment.getAdapter().notifyDataSetChanged();
+                    }
+                }
+                if(current_page.equalsIgnoreCase("search_detail")){
+                    SearchDetailFragment fragment = (SearchDetailFragment) getCurrentFragment();
+                    if(fragment.getAdapter() != null){
+                        fragment.getAdapter().setPosition(track_pos, "common");
+                        fragment.getAdapter().setChecked(true, "common");
+                        fragment.getAdapter().notifyDataSetChanged();
+                    }
+                }
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+    private void nextPlay(){
+        if(!Constant.isRepeat){
+            if(Constant.playPos < Constant.arrayList_play.size()-1){
+                initPlayer(Constant.playPos + 1);
+            }
+        }else{
+            initPlayer(Constant.playPos);
+        }
+    }
+    private void prevPlay(){
+        if(!Constant.isRepeat){
+            if(Constant.playPos != 0){
+                initPlayer(Constant.playPos - 1);
+            }
+        }else{
+            initPlayer(Constant.playPos);
+        }
+    }
+    private void stopPlayer(){
+        if(cur_track != null){
+            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
+                if(mYouTubePlayer != null){
+                    if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING){
+                        mYouTubePlayer.pause();
+                    }
+                }
+            }else{
+                Intent intent = new Intent(MainActivity.this, NotiService.class);
+                intent.setAction(NotiService.ACTION_PAUSE);
+                startService(intent);
+            }
+        }
+    }
+    private void notiPause(){
+        isPlaying = Constant.isPlayed;
+        if (Constant.isPlayed) {
+            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
+                mYouTubePlayer.pause();
+            }
+            detail_pause.setImageResource(R.drawable.ic_play);
+            mini_pause.setImageResource(R.drawable.ic_play);
+        } else {
+            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
+                mYouTubePlayer.play();
+            }
+            detail_pause.setImageResource(R.drawable.ic_pause);
+            mini_pause.setImageResource(R.drawable.ic_pause);
+        }
+    }
+    private Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            seekUpdation();
+        }
+    };
+    public void seekUpdation() {
+        try {
+            if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
+                Log.e("seek12:", NotiService.mediaPlayer.getCurrentPosition() + ":" + NotiService.mediaPlayer.getDuration());
+                min_progress.setProgress(CommonUtils.getProgressPercentage(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
+                detail_seekbar.setProgress(CommonUtils.getProgressPercentage(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
+                detail_start_time.setText(CommonUtils.milliSecondsToTimer(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
+                detail_end_time.setText(CommonUtils.milliSecondsToTimer(NotiService.mediaPlayer.getDuration(), NotiService.getInstance().getDuration()));
+                if (NotiService.mediaPlayer != null) {
+                    seekHandler.removeCallbacks(run);
+                    seekHandler.postDelayed(run, 1000);
+                }
+                if(NotiService.mediaPlayer.getDuration() - NotiService.mediaPlayer.getCurrentPosition() < (int) (NotiService.mediaPlayer.getDuration()/100)){
+                    nextPlay();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /***************favorite**********************/
+    public void setFavorite(String favorite, @NotNull String type, int list_pos){
+        if(type.equalsIgnoreCase("play_view")){
+            if(TextUtils.isEmpty(favorite)){
+                btn_detail_downstatus.setImageResource(R.drawable.unfavorite_heart);
+            }else{
+                btn_detail_downstatus.setImageResource(R.drawable.favorite_heart);
+            }
+            cur_track.setFavorite(favorite);
+            Constant.arrayList_play.set(Constant.playPos, cur_track);
+            try {
+                HomeFragment homeFragment = (HomeFragment) getCurrentFragment();
+                if(current_playing_type.equalsIgnoreCase("home")){
+                    homeFragment.update_trackList("home", Constant.playPos, cur_track);
+                }else if(current_playing_type.equalsIgnoreCase("favorite")){
+                    homeFragment.update_trackList("favorite", Constant.playPos, cur_track);
+                }else if(current_playing_type.equalsIgnoreCase("trending")){
+                    homeFragment.update_trackList("trending", Constant.playPos, cur_track);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }else if(type.equalsIgnoreCase("list_view")){
+            if(current_page.equalsIgnoreCase("saved_song")){
+                SavedFragment savedFragment =  (SavedFragment) getCurrentFragment();
+                savedFragment.updateAdapter(list_pos, favorite);
+            }else if(current_page.equalsIgnoreCase("playlist_track_detail")){
+                PlaylistTrackDetailFragment playlistTrackDetailFragment =  (PlaylistTrackDetailFragment) getCurrentFragment();
+                playlistTrackDetailFragment.updateAdapter(list_pos, null, "add");
+            }else{
+                TrackDetailFragment detailAlbumFragment =  (TrackDetailFragment) getCurrentFragment();
+                detailAlbumFragment.updateAdapter(list_pos, favorite);
+            }
+        }
+        if(current_page.equalsIgnoreCase("track_detail")){
+            TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
+            if(cur_track != null){
+                if(!current_playing_type.equalsIgnoreCase("track") && !current_playing_type.equalsIgnoreCase("detail")){
+                    fragment.updateAdapter(list_pos, favorite);
+                }else{
+                    fragment.updateAdapter(Constant.playPos, favorite);
+                }
+            }else{
+                fragment.updateAdapter(list_pos, favorite);
+            }
+        }
+        if(current_page.equalsIgnoreCase("saved_song")){
+            SavedFragment fragment = (SavedFragment) getCurrentFragment();
+            if(cur_track != null){
+                if(!current_playing_type.equalsIgnoreCase("track") && !current_playing_type.equalsIgnoreCase("detail")){
+                    fragment.updateAdapter(list_pos, favorite);
+                }else{
+                    fragment.updateAdapter(Constant.playPos, favorite);
+                }
+            }else{
+                fragment.updateAdapter(list_pos, favorite);
+            }
+        }
+
+
+
+    }
+    public void add_favorite(TrackModel cur_track, String type, int list_pos){
+        String user_id = App.readSharedSetting(PRE_USER_ID, "");
+        if (App.isNetworkAvailable(getApplicationContext())) {
+            Ion.with(getApplicationContext())
+                    .load(GlobalConstants.ADD_FAVORITE)
+                    .setTimeout(CommonUtils.NETWORK_TIME)
+                    .setBodyParameter("user_id", user_id)
+                    .setBodyParameter("p_listid", cur_track.getP_listid())
+                    .setBodyParameter("track_id", cur_track.getTrack_id())
+                    .setBodyParameter("title", cur_track.getTitle())
+                    .setBodyParameter("artist_id", cur_track.getArtist_id())
+                    .setBodyParameter("artist_name", cur_track.getArtist_name())
+                    .setBodyParameter("cover_image", cur_track.getCover_image())
+                    .setBodyParameter("album_id", cur_track.getAlbum_id())
+                    .setBodyParameter("album_name", cur_track.getAlbum_name())
+                    .setBodyParameter("videoId", cur_track.getVideoId())
+                    .asString()
+                    .setCallback(new FutureCallback<String>() {
+                        @Override
+                        public void onCompleted(Exception e, String result) {
+                            if (e == null) {
+                                try {
+                                    JSONObject resultObj = new JSONObject(result);
+                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                        String tmp_favorite = "";
+                                        if(resultObj.getString("api_result").equalsIgnoreCase("1")){
+                                            tmp_favorite = "favorite";
+                                        }
+                                        if(type.equalsIgnoreCase("play_view")){
+                                            setFavorite(tmp_favorite, "play_view", Constant.playPos);
+                                        }else{
+                                            setFavorite(tmp_favorite, type, list_pos);
+                                        }
+                                    } else {
+                                        showErrorMessages(resultObj.getString("err_msg"));
+                                    }
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                }
+                            } else {
+                                showErrorMessages(R.string.txt_server_error);
+                            }
+                        }
+                    });
+        } else {
+            showErrorMessages(R.string.txt_network_error);
+        }
+    }
+
+    /***************getvideoID**********************/
+    private void getVideoID(String id, String track_name, String artist_name, int pos){
+        String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+        if (App.isNetworkAvailable(getApplicationContext())) {
+            Ion.with(getApplicationContext())
+                    .load(GlobalConstants.SEARCH_VIDEOID)
+                    .setTimeout(CommonUtils.NETWORK_TIME)
+                    .setBodyParameter("track_id", id)
+                    .setBodyParameter("track_name", track_name)
+                    .setBodyParameter("artist_name", artist_name)
+                    .setBodyParameter("memberKey", member_key)
+                    .asString()
+                    .setCallback(new FutureCallback<String>() {
+                        @Override
+                        public void onCompleted(Exception e, String result) {
+                            if (e == null) {
+                                try {
+                                    JSONObject resultObj = new JSONObject(result);
+                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                        JSONObject api_result = resultObj.getJSONObject("api_result");
+                                        Constant.cur_videoId = api_result.getString("videoId");
+                                        if(mYouTubePlayer != null){
+                                            if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING){
+                                                mYouTubePlayer.pause();
+                                            }
+                                            mYouTubePlayer.loadVideo(Constant.cur_videoId, 0);
+                                            if(current_page.equalsIgnoreCase("track_detail")){
+                                                TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
+                                                if(fragment.getAdapter() != null){
+                                                    fragment.getAdapter().setPosition(pos, "common");
+                                                    fragment.getAdapter().setChecked(true, "common");
+                                                    fragment.getAdapter().notifyDataSetChanged();
+                                                }
+                                            }
+                                            if(current_page.equalsIgnoreCase("saved_song")){
+                                                SavedFragment fragment = (SavedFragment) getCurrentFragment();
+                                                if(fragment.getAdapter() != null){
+                                                    fragment.getAdapter().setPosition(pos, "common");
+                                                    fragment.getAdapter().setChecked(true, "common");
+                                                    fragment.getAdapter().notifyDataSetChanged();
+                                                }
+                                            }
+                                            if(current_page.equalsIgnoreCase("playlist_track_detail")){
+                                                PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
+                                                if(fragment.getAdapter() != null){
+                                                    fragment.getAdapter().setPosition(pos, "common");
+                                                    fragment.getAdapter().setChecked(true, "common");
+                                                    fragment.getAdapter().notifyDataSetChanged();
+                                                }
+                                            }
+                                            if(current_page.equalsIgnoreCase("search")){
+                                                SearchFragment fragment = (SearchFragment) getCurrentFragment();
+                                                if(fragment.getAdapter() != null){
+                                                    fragment.getAdapter().setPosition(pos, "common");
+                                                    fragment.getAdapter().setChecked(true, "common");
+                                                    fragment.getAdapter().notifyDataSetChanged();
+                                                }
+                                            }
+                                            if(current_page.equalsIgnoreCase("search_detail")){
+                                                SearchDetailFragment fragment = (SearchDetailFragment) getCurrentFragment();
+                                                if(fragment.getAdapter() != null){
+                                                    fragment.getAdapter().setPosition(pos, "common");
+                                                    fragment.getAdapter().setChecked(true, "common");
+                                                    fragment.getAdapter().notifyDataSetChanged();
+                                                }
+                                            }
+                                            Intent intent = new Intent(MainActivity.this, NotiService.class);
+                                            intent.setAction(NotiService.ACTION_PLAY);
+                                            startService(intent);
+                                        }
+                                    } else {
+                                        showErrorMessages(resultObj.getString("err_msg"));
+                                    }
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                    Constant.cur_videoId = "";
+                                    showErrorMessages("Couldn't find video");
+                                }
+                            } else {
+                                showErrorMessages(R.string.txt_server_error);
+                            }
+                        }
+                    });
+        } else {
+            showErrorMessages(R.string.txt_network_error);
+        }
+    }
+    public void getVID_download(TrackModel trackModel, String type, int list_pos, String action){
+        String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+        if (App.isNetworkAvailable(getApplicationContext())) {
+            Ion.with(getApplicationContext())
+                    .load(GlobalConstants.SEARCH_VIDEOID)
+                    .setTimeout(CommonUtils.NETWORK_TIME)
+                    .setBodyParameter("track_id", trackModel.getTrack_id())
+                    .setBodyParameter("track_name", trackModel.getTitle())
+                    .setBodyParameter("artist_name", trackModel.getArtist_name())
+                    .setBodyParameter("memberKey", member_key)
+                    .asString()
+                    .setCallback(new FutureCallback<String>() {
+                        @Override
+                        public void onCompleted(Exception e, String result) {
+                            if (e == null) {
+                                try {
+                                    JSONObject resultObj = new JSONObject(result);
+                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                        JSONObject api_result = resultObj.getJSONObject("api_result");
+                                        String cvid = api_result.getString("videoId");
+                                        if(!TextUtils.isEmpty(cvid) && cvid != null){
+                                            add_download(trackModel, cvid, type, list_pos, action);
+                                        }
+                                    } else {
+                                        showErrorMessages(resultObj.getString("err_msg"));
+                                    }
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                    showErrorMessages("Couldn't find video");
+                                }
+                            } else {
+                                showErrorMessages(R.string.txt_server_error);
+                            }
+                        }
+                    });
+        } else {
+            showErrorMessages(R.string.txt_network_error);
+        }
+    }
+
+
+
     public void setLibrary(){
         selectedItem = mBottomNav.getMenu().getItem(1);
         selectFragment(selectedItem, true);
@@ -1097,22 +1277,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         SettingFragment frag = new SettingFragment();
         pushFragment(frag, true, SettingFragment.class.getName());
     }
-    private void notiPause(){
-        isPlaying = Constant.isPlayed;
-        if (Constant.isPlayed) {
-            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
-                mYouTubePlayer.pause();
-            }
-            detail_pause.setImageResource(R.drawable.ic_play);
-            mini_pause.setImageResource(R.drawable.ic_play);
-        } else {
-            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
-                mYouTubePlayer.play();
-            }
-            detail_pause.setImageResource(R.drawable.ic_pause);
-            mini_pause.setImageResource(R.drawable.ic_pause);
-        }
-    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()){
@@ -1248,114 +1413,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
-    @Override
-    public void downloadVideoFinish(String s) {
-        downloadImageRequest(cur_download_track.getCover_image(), cur_download_trackid);
-    }
-
-    @Override
-    public void updateProgress(int pro) {
-
-    }
-
-    @Override
-    public void downloadVideoFail(String fail) {
-
-        if(current_page.equalsIgnoreCase("track_detail")){
-            TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("saved_song")){
-            SavedFragment fragment = (SavedFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("playlist_track_detail")){
-            PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search_detail")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        Constant.cur_download_trackid = "";
-        Constant.downloading_list.remove(0);
-        if(Constant.downloading_list.size()>0){
-            download_action(Constant.downloading_list.get(0));
-        }
-        showErrorMessages("File Download fail: Please try again");
-    }
-
-    @Override
-    public void getLinkSuccess(String linkMusic) {
-        downloadVideoRequest(linkMusic, cur_download_trackid);
-    }
-
-    @Override
-    public void getLinkFail() {
-
-        if(current_page.equalsIgnoreCase("track_detail")){
-            TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("saved_song")){
-            SavedFragment fragment = (SavedFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("playlist_track_detail")){
-            PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search_detail")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        Constant.cur_download_trackid = "";
-        Constant.downloading_list.remove(0);
-        if(Constant.downloading_list.size()>0){
-            download_action(Constant.downloading_list.get(0));
-        }
-
-        showErrorMessages("FileSource Get fail: Please try again");
-
-    }
 
     BroadcastReceiver mActivityReceiver = new BroadcastReceiver() {
         @Override
@@ -1374,13 +1431,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 notiPause();
             }
             boolean isPlayed = intent.getBooleanExtra("is_played", false);
-            Log.e("service:0", isPlayed + "");
             if(isPlayed){
                 min_loading.setVisibility(View.GONE);
                 detail_pause.setImageResource(R.drawable.ic_pause);
                 mini_pause.setImageResource(R.drawable.ic_pause);
-//                detail_seekbar.setMax((int) NotiService.getInstance().getDuration());
-//                min_progress.setMax((int) NotiService.getInstance().getDuration());
                 seekUpdation();
             }
 
@@ -1388,33 +1442,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     };
 
-    private Runnable run = new Runnable() {
-        @Override
-        public void run() {
-            seekUpdation();
-        }
-    };
 
-    public void seekUpdation() {
-        try {
-            if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
-                Log.e("seek12:", NotiService.mediaPlayer.getCurrentPosition() + ":" + NotiService.mediaPlayer.getDuration());
-                min_progress.setProgress(CommonUtils.getProgressPercentage(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
-                detail_seekbar.setProgress(CommonUtils.getProgressPercentage(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
-                detail_start_time.setText(CommonUtils.milliSecondsToTimer(NotiService.mediaPlayer.getCurrentPosition(), NotiService.getInstance().getDuration()));
-                detail_end_time.setText(CommonUtils.milliSecondsToTimer(NotiService.mediaPlayer.getDuration(), NotiService.getInstance().getDuration()));
-                if (NotiService.mediaPlayer != null) {
-                    seekHandler.removeCallbacks(run);
-                    seekHandler.postDelayed(run, 1000);
-                }
-                if(NotiService.mediaPlayer.getDuration() - NotiService.mediaPlayer.getCurrentPosition() < (int) (NotiService.mediaPlayer.getDuration()/100)){
-                    nextPlay();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     @Override
     public void onPause() {
         seekHandler.removeCallbacks(run);

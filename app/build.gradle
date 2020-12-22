@@ -53,7 +53,7 @@ dependencies {
 
     // network
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.squareup.okhttp3:okhttp:4.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.7.2'
     implementation 'com.koushikdutta.ion:ion:3.0.8'
     //round image
     implementation 'com.makeramen:roundedimageview:2.3.0'
@@ -76,12 +76,8 @@ dependencies {
     //download
     implementation 'com.mindorks.android:prdownloader:0.6.0'
     implementation 'org.jsoup:jsoup:1.11.3'
-    //exo player
-    implementation 'com.google.android.exoplayer:exoplayer:2.8.1'
-    implementation 'com.github.HaarigerHarald:android-youtubeExtractor:master-SNAPSHOT'
-    implementation 'com.github.ed-george:AndroidVimeoExtractor:1.1.2'
 
 //facebook
-    implementation 'com.facebook.android:facebook-login:[5,6)'
+    implementation 'com.facebook.android:facebook-login:8.1.0'
 
 }
