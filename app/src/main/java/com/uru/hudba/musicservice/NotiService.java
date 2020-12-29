@@ -509,17 +509,19 @@ public class NotiService extends IntentService {
 
             boolean noti_play = intent.getBooleanExtra("noti_play", false);
             if(noti_play){
-                if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
-                    try {
+                try {
+                    if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
                         if(Constant.isPlayed){
                             mediaPlayer.start();
                         }else{
                             mediaPlayer.pause();
                         }
-                    }catch (Exception e){
-                        e.printStackTrace();
+
                     }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
+
                 updateNotiPlay(false);
             }
         }

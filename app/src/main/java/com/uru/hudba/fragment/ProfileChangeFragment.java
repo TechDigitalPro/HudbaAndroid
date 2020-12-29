@@ -78,13 +78,10 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
     private ImageView submit;
     private EditText et_pass, et_email, et_first_name, et_last_name;
     private TextView btn_change;
-
     private String user_email, user_name, user_firstname, user_lastname, user_image = "";
-
     private ExecutorService mExecutorService = Executors.newFixedThreadPool(1);
     private ImageCompressTask imageCompressTask;
     private String filePath;
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).current_page = "profile_change";
@@ -109,7 +106,6 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
                 .load(user_image)
                 .placeholder(R.drawable.ic_profile)
                 .into(img_profile);
-
 
         et_email.setText(user_email);
         et_first_name.setText(user_firstname);

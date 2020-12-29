@@ -1,20 +1,28 @@
 package com.uru.hudba.fragment;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,11 +75,12 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
     private RelativeLayout add_playlist;
     private PlayListAdapter playlistAdapter;
     private LinearLayout li_saved, li_playlist, li_list;
-    private SearchView searchTxt;
+    private AutoCompleteTextView searchTxt;
     private ArrayList<PlayListModel> playList = new ArrayList<>();
     private int saved_song_cnt = 0;
     private String tmp_image_path = "";
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).current_page = "library";
@@ -98,31 +107,54 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
         rv_playlist.setLayoutManager(linearLayoutManager);
 
         searchTxt = rootView.findViewById(R.id.search_txt);
-        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if(playlistAdapter != null){
-                    playlistAdapter.searchItems(query);
-                }
-                return false;
+        searchTxt.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
             }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
                 if(playlistAdapter != null){
-                    playlistAdapter.searchItems(newText);
+                    playlistAdapter.searchItems(s);
+                }
+
+
+            }
+        });
+        searchTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == 666) {
+                    if(playlistAdapter != null){
+                        playlistAdapter.searchItems(searchTxt.getText().toString());
+                    }
+                    return true;
                 }
                 return false;
             }
         });
-        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
+        searchTxt.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-            }
-        });
-        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (searchTxt.getRight() - searchTxt.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        searchTxt.setText("");
+                        searchTxt.clearFocus();
+                        if(playlistAdapter != null){
+                            playlistAdapter.searchItems("");
+                        }
+                        return true;
+                    }
+                }
                 return false;
             }
         });

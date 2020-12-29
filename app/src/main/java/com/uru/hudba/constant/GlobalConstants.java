@@ -45,6 +45,7 @@ public class GlobalConstants {
     public static final String PLAYLIST_TRACK_DETAIL = BaseUrl + "library/my_playlist_tracks" + Client + ApiVersion;
 
     public static final String SEARCH = BaseUrl + "search/index" + Client + ApiVersion;
+    public static final String SEARCH_MAIN = BaseUrl + "search/main" + Client + ApiVersion;
 
 
     public static final String term_link = "https://hudba.app/termsAndConditions";

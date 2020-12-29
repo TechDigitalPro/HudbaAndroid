@@ -162,6 +162,9 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
                 }
             }
 
+            if(Constant.cur_track_id.equalsIgnoreCase(item.getTrack_id())){
+                holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
+            }
             if(Constant.downloading_list != null && Constant.downloading_list.size()>0){
                 for(int i = 0; i< Constant.downloading_list.size(); i++){
                     if(Constant.downloading_list.get(i).getTrackModel().getTrack_id().equalsIgnoreCase(item.getTrack_id())){

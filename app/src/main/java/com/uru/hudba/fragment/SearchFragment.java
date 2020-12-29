@@ -1,12 +1,17 @@
 package com.uru.hudba.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -53,7 +58,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
     private View rootView;
     private ImageView btn_profile;
     private RecyclerView rv_search;
-    private SearchView searchTxt;
+    private AutoCompleteTextView searchTxt;
 
     private ArrayList<SearchModel> searchList = new ArrayList<>();
     private SearchAdapter searchAdapter;
@@ -81,6 +86,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
         return rootView;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         btn_profile = rootView.findViewById(R.id.btn_profile);
         btn_profile.setOnClickListener(new View.OnClickListener() {
@@ -98,72 +104,125 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
         rv_search.setLayoutManager(new GridLayoutManager(getContext(), 2));
         searchTxt = rootView.findViewById(R.id.search_txt);
 
-        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                if(TextUtils.isEmpty(query)){
-                    li_main.setVisibility(View.VISIBLE);
-                    li_search.setVisibility(View.GONE);
-                }else{
-                    li_main.setVisibility(View.GONE);
-                    li_search.setVisibility(View.VISIBLE);
-                    li_empty.setVisibility(View.GONE);
-                    onSearch(query);
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == 666) {
+                    if(TextUtils.isEmpty(searchTxt.getText().toString())){
+                        li_main.setVisibility(View.VISIBLE);
+                        li_search.setVisibility(View.GONE);
+                        li_empty.setVisibility(View.GONE);
+                        li_loading.setVisibility(View.GONE);
+                    }
+                    else{
+
+                        li_main.setVisibility(View.GONE);
+                        li_search.setVisibility(View.VISIBLE);
+                        li_empty.setVisibility(View.GONE);
+                        li_loading.setVisibility(View.VISIBLE);
+                        onSearch(searchTxt.getText().toString());
+                    }
+                    return true;
                 }
                 return false;
             }
-
+        });
+        searchTxt.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onQueryTextChange(String newText) {
-                Log.e("query:", newText + "");
-                if(TextUtils.isEmpty(newText)){
-                    li_main.setVisibility(View.VISIBLE);
-                    li_search.setVisibility(View.GONE);
-                    li_empty.setVisibility(View.GONE);
-                    li_loading.setVisibility(View.GONE);
-                }
-                else{
-                    li_main.setVisibility(View.GONE);
-                    li_search.setVisibility(View.VISIBLE);
-                    li_empty.setVisibility(View.GONE);
-                    li_loading.setVisibility(View.VISIBLE);
-                    onSearch(newText);
-                }
-//                new Handler(getMainLooper()).postDelayed(()->{
-//                    onSearch(newText);
-//                }, 1000);
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
 
-//                final Handler handler = new Handler();
-//                handler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if(TextUtils.isEmpty(newText)){
-//                            li_main.setVisibility(View.VISIBLE);
-//                            li_search.setVisibility(View.GONE);
-//                        }else{
-//                            li_main.setVisibility(View.GONE);
-//                            li_search.setVisibility(View.VISIBLE);
-//                            li_loading.setVisibility(View.VISIBLE);
-//                            onSearch(search_str);
-//                        }
-//                    }
-//                }, 500);
-
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (searchTxt.getRight() - searchTxt.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        searchTxt.setText("");
+                        searchTxt.clearFocus();
+                        li_main.setVisibility(View.VISIBLE);
+                        li_search.setVisibility(View.GONE);
+                        li_empty.setVisibility(View.GONE);
+                        li_loading.setVisibility(View.GONE);
+                        return true;
+                    }
+                }
                 return false;
             }
         });
-        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e("search:", searchTxt.getQuery().toString());
-            }
-        });
-        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                return false;
-            }
-        });
+
+//        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                if(TextUtils.isEmpty(query)){
+//                    li_main.setVisibility(View.VISIBLE);
+//                    li_search.setVisibility(View.GONE);
+//                    li_empty.setVisibility(View.GONE);
+//                    li_loading.setVisibility(View.GONE);
+//                }
+//                else{
+//
+//                    li_main.setVisibility(View.GONE);
+//                    li_search.setVisibility(View.VISIBLE);
+//                    li_empty.setVisibility(View.GONE);
+//                    li_loading.setVisibility(View.VISIBLE);
+//                    onSearch(query);
+//                }
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                Log.e("query:", newText + "");
+//                if(TextUtils.isEmpty(newText)){
+//                    li_main.setVisibility(View.VISIBLE);
+//                    li_search.setVisibility(View.GONE);
+//                    li_empty.setVisibility(View.GONE);
+//                    li_loading.setVisibility(View.GONE);
+//                }
+////                else{
+////
+////                    li_main.setVisibility(View.GONE);
+////                    li_search.setVisibility(View.VISIBLE);
+////                    li_empty.setVisibility(View.GONE);
+////                    li_loading.setVisibility(View.VISIBLE);
+////                    onSearch(newText);
+////                }
+////                new Handler(getMainLooper()).postDelayed(()->{
+////                    onSearch(newText);
+////                }, 1000);
+//
+////                final Handler handler = new Handler();
+////                handler.postDelayed(new Runnable() {
+////                    @Override
+////                    public void run() {
+////                        if(TextUtils.isEmpty(newText)){
+////                            li_main.setVisibility(View.VISIBLE);
+////                            li_search.setVisibility(View.GONE);
+////                        }else{
+////                            li_main.setVisibility(View.GONE);
+////                            li_search.setVisibility(View.VISIBLE);
+////                            li_loading.setVisibility(View.VISIBLE);
+////                            onSearch(search_str);
+////                        }
+////                    }
+////                }, 500);
+//
+//                return false;
+//            }
+//        });
+//        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.e("search:", searchTxt.getQuery().toString());
+//            }
+//        });
+//        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
+//            @Override
+//            public boolean onClose() {
+//                return false;
+//            }
+//        });
 
 
         /******************Tracks**************/
@@ -215,7 +274,6 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                         JSONObject api_result = resultObj.getJSONObject("api_result");
                                         JSONArray articleArray = api_result.getJSONArray("list");
                                         Gson gson = new Gson();
-
                                         if (articleArray.length() == 0){
                                             searchList.clear();
                                         }else {
@@ -225,7 +283,6 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                             }
                                             createRV(searchList);
                                         }
-
                                     } else {
                                         ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
                                     }
@@ -316,20 +373,10 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                                 TrackModel trackModel = gson.fromJson(trackArray.getJSONObject(i).toString(), TrackModel.class);
                                                 track_list.add(trackModel);
                                             }
-//                                            if(trackAdapter == null){
-//                                                createTrackRV(track_list);
-//                                            }else{
-//                                                trackAdapter.notifyDataSetChanged();
-//                                                rv_track.setVisibility(View.VISIBLE);
-//                                            }
                                             createTrackRV(track_list);
-
                                         }
-
-
                                         JSONArray albumArray = api_result.getJSONArray("album_list");
                                         album_list.clear();
-
                                         if (albumArray.length() == 0){
                                             li_album.setVisibility(View.GONE);
                                         }else {
@@ -348,19 +395,9 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                                 albumModel.setCover_image(cover_image);
                                                 album_list.add(albumModel);
                                             }
-//                                            if(albumAdapter == null){
-//                                                createAlbumRV(album_list);
-//                                            }else{
-//                                                albumAdapter.notifyDataSetChanged();
-//                                                rv_album.setVisibility(View.VISIBLE);
-//                                            }
                                             createAlbumRV(album_list);
-
                                         }
-
-
                                         artist_list.clear();
-
                                         JSONArray artistArray = api_result.getJSONArray("artist_list");
                                         if (artistArray.length() == 0){
                                             li_artist.setVisibility(View.GONE);
@@ -378,15 +415,8 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                                 topModel.setTracklist(track_list);
                                                 artist_list.add(topModel);
                                             }
-//                                            if(artistAdapter == null){
-//                                                createArtistRV(artist_list);
-//                                            }else{
-//                                                artistAdapter.notifyDataSetChanged();
-//                                                rv_artist.setVisibility(View.VISIBLE);
-//                                            }
                                             createArtistRV(artist_list);
                                         }
-                                        li_loading.setVisibility(View.GONE);
                                         if(trackArray.length() == 0 && albumArray.length() == 0 && artistArray.length() == 0){
                                             li_search.setVisibility(View.GONE);
                                             li_empty.setVisibility(View.VISIBLE);
@@ -404,7 +434,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                             } else {
                                 ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
                             }
-
+                            li_loading.setVisibility(View.GONE);
                         }
                     });
         } else {
@@ -469,8 +499,8 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
             case R.id.tv_track_all:
                 Bundle bundle = new Bundle();
                 TrackDetailFragment frag0 = new TrackDetailFragment();
-                bundle.putString("id", searchTxt.getQuery().toString());
-                bundle.putString("title", searchTxt.getQuery().toString());
+                bundle.putString("id", searchTxt.getText().toString());
+                bundle.putString("title", searchTxt.getText().toString());
                 bundle.putString("type", "track");
                 bundle.putString("image", "search_track");
                 frag0.setArguments(bundle);
@@ -482,7 +512,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                 Bundle param = new Bundle();
                 param.putString("type", "search");
                 param.putString("data_type", "album");
-                param.putString("keyword", searchTxt.getQuery().toString());
+                param.putString("keyword", searchTxt.getText().toString());
                 frag.setArguments(param);
                 pushFragment(frag, true, SelectAllFragment.class.getName());
 
@@ -493,7 +523,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                 Bundle param1 = new Bundle();
                 param1.putString("type", "search");
                 param1.putString("data_type", "artist");
-                param1.putString("keyword", searchTxt.getQuery().toString());
+                param1.putString("keyword", searchTxt.getText().toString());
                 frag1.setArguments(param1);
                 pushFragment(frag1, true, SelectAllFragment.class.getName());
                 break;

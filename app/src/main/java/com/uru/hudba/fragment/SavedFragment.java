@@ -1,11 +1,18 @@
 package com.uru.hudba.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,7 +68,7 @@ public class SavedFragment extends Fragment {
     private SavedTrackAdapter homeAdapter;
     private int saved_song_cnt = 0;
     private CollapsingToolbarLayoutState state;
-    private SearchView searchTxt;
+    private AutoCompleteTextView searchTxt;
 
     private enum CollapsingToolbarLayoutState {
         EXPANDED,
@@ -86,6 +93,7 @@ public class SavedFragment extends Fragment {
         return rootView;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         appBarLayout = rootView.findViewById(R.id.app_bar);
         toolbar = rootView.findViewById(R.id.toolbar);
@@ -166,31 +174,54 @@ public class SavedFragment extends Fragment {
             }
         });
         searchTxt = rootView.findViewById(R.id.search_txt);
-        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if(homeAdapter != null){
-                    homeAdapter.searchItems(query);
-                }
-                return false;
+        searchTxt.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
             }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
                 if(homeAdapter != null){
-                    homeAdapter.searchItems(newText);
+                    homeAdapter.searchItems(s);
+                }
+
+
+            }
+        });
+        searchTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == 666) {
+                    if(homeAdapter != null){
+                        homeAdapter.searchItems(searchTxt.getText().toString());
+                    }
+                    return true;
                 }
                 return false;
             }
         });
-        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
+        searchTxt.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-            }
-        });
-        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (searchTxt.getRight() - searchTxt.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        searchTxt.setText("");
+                        searchTxt.clearFocus();
+                        if(homeAdapter != null){
+                            homeAdapter.searchItems("");
+                        }
+                        return true;
+                    }
+                }
                 return false;
             }
         });

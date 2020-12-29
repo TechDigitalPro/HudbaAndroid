@@ -42,6 +42,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
+import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
 public class SearchDetailFragment extends BaseFragment implements View.OnClickListener {
     private View rootView;
@@ -88,7 +89,9 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
 
         rootView = inflater.inflate(R.layout.fragment_search_detail, container, false);
         main_shuffle = rootView.findViewById(R.id.main_shuffle);
+        main_shuffle.setOnClickListener(this);
         toolbar_shuffle = rootView.findViewById(R.id.toolbar_shuffle);
+        toolbar_shuffle.setOnClickListener(this);
         li_content = rootView.findViewById(R.id.li_content);
         toolbar_title = rootView.findViewById(R.id.toolbar_title);
         content_title = rootView.findViewById(R.id.content_title);
@@ -179,6 +182,12 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
 
         return rootView;
     }
+    public void updateAdapter(int pos, String value){
+        TrackModel tmp = track_list.get(pos);
+        tmp.setFavorite(value);
+        track_list.set(pos, tmp);
+        trackAdapter.notifyDataSetChanged();
+    }
     public TrackAdapter getAdapter(){
         return trackAdapter;
     }
@@ -189,13 +198,16 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
         artist_list.clear();
 
         String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+        String user_id = App.readSharedSetting(PRE_USER_ID, "");
         Log.e("member_key:", member_key);
         if (App.isNetworkAvailable(getContext())) {
             Ion.with(getContext())
-                    .load(GlobalConstants.SEARCH_DETAIL)
+                    .load(GlobalConstants.SEARCH_MAIN)
                     .setTimeout(CommonUtils.NETWORK_TIME)
                     .setBodyParameter("memberKey", member_key)
-                    .setBodyParameter("list_id", search_id)
+                    .setBodyParameter("id", search_id)
+                    .setBodyParameter("user_id", user_id)
+                    .setBodyParameter("type", "all")
                     .asString()
                     .setCallback(new FutureCallback<String>() {
                         @Override
@@ -231,7 +243,7 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
                                         }else {
                                             li_album.setVisibility(View.VISIBLE);
                                             for (int i = 0; i < albumArray.length(); i++) {
-                                                String p_id = albumArray.getJSONObject(i).getString("search_id");
+                                                String p_id = albumArray.getJSONObject(i).getString("list_id");
                                                 String title = albumArray.getJSONObject(i).getString("title");
                                                 String tracklist = albumArray.getJSONObject(i).getString("tracklist");
                                                 String cover_image = albumArray.getJSONObject(i).getString("cover_image");
@@ -255,7 +267,7 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
                                         }else {
                                             li_playlist.setVisibility(View.VISIBLE);
                                             for (int i = 0; i < playlistArray.length(); i++) {
-                                                String list_id = playlistArray.getJSONObject(i).getString("playlist_id");
+                                                String list_id = playlistArray.getJSONObject(i).getString("list_id");
                                                 String title = playlistArray.getJSONObject(i).getString("title");
                                                 String cover_image = playlistArray.getJSONObject(i).getString("cover_image");
                                                 String description = playlistArray.getJSONObject(i).getString("user_name");
@@ -280,8 +292,8 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
                                             li_artist.setVisibility(View.VISIBLE);
                                             for (int i = 0; i < artistArray.length(); i++) {
                                                 String list_id = artistArray.getJSONObject(i).getString("artist_id");
-                                                String title = artistArray.getJSONObject(i).getString("name");
-                                                String cover_image = artistArray.getJSONObject(i).getString("image");
+                                                String title = artistArray.getJSONObject(i).getString("title");
+                                                String cover_image = artistArray.getJSONObject(i).getString("cover_image");
                                                 String track_list = artistArray.getJSONObject(i).getString("tracklist");
                                                 AlbumModel topModel = new AlbumModel();
                                                 topModel.setList_id(list_id);
@@ -319,55 +331,125 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
         albumAdapter = new AlbumAdapter(getContext(), album_list,getFragmentManager(), "album", "common");
         albumAdapter.notifyDataSetChanged();
         rv_album.setAdapter(albumAdapter);
+        albumAdapter = new AlbumAdapter(getContext(), album_list,getFragmentManager(), "top", "common");
+        albumAdapter.notifyDataSetChanged();
+        rv_album.setAdapter(albumAdapter);
+        albumAdapter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String id = album_list.get(rv_album.getChildAdapterPosition(view)).getList_id();
+                String title = album_list.get(rv_album.getChildAdapterPosition(view)).getTitle();
+
+                Bundle bundle = new Bundle();
+                TrackDetailFragment frag = new TrackDetailFragment();
+                bundle.putString("id", id);
+                bundle.putString("title", title);
+                bundle.putString("type", "search_album");
+                frag.setArguments(bundle);
+                pushFragment(frag, true, TrackDetailFragment.class.getName());
+            }
+        });
     }
     private void createPlaylistRV(ArrayList<AlbumModel> album_list){
         playlistAdapter = new AlbumAdapter(getContext(), album_list,getFragmentManager(), "top", "common");
         playlistAdapter.notifyDataSetChanged();
         rv_playlist.setAdapter(playlistAdapter);
-//        playlistAdapter.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                String id = play_list.get(rv_playlist.getChildAdapterPosition(view)).getList_id();
-//                String title = play_list.get(rv_playlist.getChildAdapterPosition(view)).getTitle();
-//
-//                Bundle bundle = new Bundle();
-//                TrackDetailFragment frag = new TrackDetailFragment();
-//                bundle.putString("id", id);
-//                bundle.putString("title", title);
-//                bundle.putString("type", "ranking");
-//                frag.setArguments(bundle);
-//                pushFragment(frag, true, TrackDetailFragment.class.getName());
-//            }
-//        });
+        playlistAdapter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String id = play_list.get(rv_playlist.getChildAdapterPosition(view)).getList_id();
+                String title = play_list.get(rv_playlist.getChildAdapterPosition(view)).getTitle();
+
+                Bundle bundle = new Bundle();
+                TrackDetailFragment frag = new TrackDetailFragment();
+                bundle.putString("id", id);
+                bundle.putString("title", title);
+                bundle.putString("type", "search_playlist");
+                frag.setArguments(bundle);
+                pushFragment(frag, true, TrackDetailFragment.class.getName());
+            }
+        });
     }
     private void createArtistRV(ArrayList<AlbumModel> play_list){
         artistAdapter = new AlbumAdapter(getContext(), play_list,getFragmentManager(), "artist", "common");
         artistAdapter.notifyDataSetChanged();
         rv_artist.setAdapter(artistAdapter);
+        rv_artist.setAdapter(artistAdapter);
+        artistAdapter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String id = artist_list.get(rv_artist.getChildAdapterPosition(view)).getList_id();
+                String title = artist_list.get(rv_artist.getChildAdapterPosition(view)).getTitle();
+
+                Bundle bundle = new Bundle();
+                TrackDetailFragment frag = new TrackDetailFragment();
+                bundle.putString("id", id);
+                bundle.putString("title", title);
+                bundle.putString("type", "search_artist");
+                frag.setArguments(bundle);
+                pushFragment(frag, true, TrackDetailFragment.class.getName());
+            }
+        });
     }
 
-
-    private void ReplaceFragment(String type){
-        Fragment frag = null;
-        frag = new SelectAllFragment();
-        Bundle param = new Bundle();
-        param.putString("type", type);
-        frag.setArguments(param);
-        pushFragment(frag, true, SelectAllFragment.class.getName());
-    }
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.tv_track_all:
-                ReplaceFragment("top");
+                Bundle bundle = new Bundle();
+                TrackDetailFragment frag0 = new TrackDetailFragment();
+                bundle.putString("id", search_id);
+                bundle.putString("type", "track");
+                bundle.putString("image", "search_main");
+                frag0.setArguments(bundle);
+                pushFragment(frag0, true, TrackDetailFragment.class.getName());
                 break;
             case R.id.tv_playlist_all:
+                Fragment frag2 = null;
+                frag2 = new SelectAllFragment();
+                Bundle param2 = new Bundle();
+                param2.putString("type", "search");
+                param2.putString("search_type", "playlist");
+                param2.putString("keyword", search_id);
+                frag2.setArguments(param2);
+                pushFragment(frag2, true, SelectAllFragment.class.getName());
+                break;
+            case R.id.tv_album_all:
+                Fragment frag = null;
+                frag = new SelectAllFragment();
+                Bundle param = new Bundle();
+                param.putString("type", "search");
+                param.putString("search_type", "album");
+                param.putString("keyword", search_id);
+                frag.setArguments(param);
+                pushFragment(frag, true, SelectAllFragment.class.getName());
                 break;
             case R.id.tv_artist_all:
-                ReplaceFragment("ranking");
+                Fragment frag1 = null;
+                frag1 = new SelectAllFragment();
+                Bundle param1 = new Bundle();
+                param1.putString("type", "search");
+                param1.putString("search_type", "artist");
+                param1.putString("keyword", search_id);
+                frag1.setArguments(param1);
+                pushFragment(frag1, true, SelectAllFragment.class.getName());
                 break;
             case R.id.back_btn:
                 popFragment();
+                break;
+            case R.id.main_shuffle:
+                if(track_list != null){
+                    ((MainActivity)getContext()).setTrackList(track_list);
+                    ((MainActivity)getContext()).initPlayer(0);
+                    ((MainActivity)getContext()).current_playing_type = "detail";
+                }
+                break;
+            case R.id.toolbar_shuffle:
+                if(track_list != null){
+                    ((MainActivity)getContext()).setTrackList(track_list);
+                    ((MainActivity)getContext()).initPlayer(0);
+                    ((MainActivity)getContext()).current_playing_type = "detail";
+                }
                 break;
         }
     }

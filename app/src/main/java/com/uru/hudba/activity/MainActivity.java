@@ -1022,9 +1022,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }else if(current_page.equalsIgnoreCase("playlist_track_detail")){
                 PlaylistTrackDetailFragment playlistTrackDetailFragment =  (PlaylistTrackDetailFragment) getCurrentFragment();
                 playlistTrackDetailFragment.updateAdapter(list_pos, null, "add");
-            }else{
+            }else if(current_page.equalsIgnoreCase("track_detail")){
                 TrackDetailFragment detailAlbumFragment =  (TrackDetailFragment) getCurrentFragment();
                 detailAlbumFragment.updateAdapter(list_pos, favorite);
+            }else if(current_page.equalsIgnoreCase("search_detail")){
+                SearchDetailFragment searchDetailFragment =  (SearchDetailFragment) getCurrentFragment();
+                searchDetailFragment.updateAdapter(list_pos, favorite);
             }
         }
         if(current_page.equalsIgnoreCase("track_detail")){

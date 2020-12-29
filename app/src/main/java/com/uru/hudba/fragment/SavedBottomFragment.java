@@ -173,14 +173,16 @@ public class SavedBottomFragment extends SuperBottomSheetFragment implements Vie
         return  getActivity().getResources().getDimension(R.dimen.padding_20);
     }
 
-    @Override
-    public int getPeekHeight(){
-        if(cur_favorite.equalsIgnoreCase("download")){
-            return 1410;
-        }else{
-            return 1480;
-        }
-    }
+//    @Override
+//    public int getPeekHeight(){
+//        if(cur_favorite.equalsIgnoreCase("download")){
+//            Log.e("screen11" , "a");
+//            return 1380;
+//        }else{
+//            Log.e("screen12" , "a2");
+//            return 1420;
+//        }
+//    }
     @Override
     public void onPause() {
         super.onPause();

@@ -2,6 +2,7 @@ package com.uru.hudba.fragment;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -418,10 +419,11 @@ public class PlayListBottomFragment extends SuperBottomSheetFragment implements 
         return  getActivity().getResources().getDimension(R.dimen.padding_20);
     }
 
-    @Override
-    public int getPeekHeight(){
-        return 1200;
-    }
+//    @Override
+//    public int getPeekHeight(){
+//        Log.e("screen111" , "a");
+//        return 1200;
+//    }
     @Override
     public void onPause() {
         super.onPause();

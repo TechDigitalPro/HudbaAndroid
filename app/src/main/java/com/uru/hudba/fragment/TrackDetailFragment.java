@@ -1,11 +1,18 @@
 package com.uru.hudba.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -57,7 +64,7 @@ public class TrackDetailFragment extends Fragment {
     private String p_listId = "", title = "", type = "", image_url = "";
     private ArrayList<TrackModel> trackList = new ArrayList<>();
     private TrackAdapter homeAdapter;
-    private SearchView searchTxt;
+    private AutoCompleteTextView searchTxt;
 
     private CollapsingToolbarLayoutState state;
 
@@ -86,6 +93,8 @@ public class TrackDetailFragment extends Fragment {
         initView();
         if(!TextUtils.isEmpty(image_url) && image_url.equalsIgnoreCase("search_track")){
             getSearchTrackAll();
+        }else if(!TextUtils.isEmpty(image_url) && image_url.equalsIgnoreCase("search_main")){
+            getSearchMainTrackAll();
         }else{
             getData();
         }
@@ -95,6 +104,7 @@ public class TrackDetailFragment extends Fragment {
         return rootView;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         appBarLayout = rootView.findViewById(R.id.app_bar);
         toolbar = rootView.findViewById(R.id.toolbar);
@@ -187,32 +197,55 @@ public class TrackDetailFragment extends Fragment {
             }
         });
 
-        searchTxt = rootView.findViewById(R.id.search_et);
-        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                if(homeAdapter != null){
-                    homeAdapter.searchItems(query);
-                }
-                return false;
+        searchTxt = rootView.findViewById(R.id.search_txt);
+        searchTxt.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
             }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
                 if(homeAdapter != null){
-                    homeAdapter.searchItems(newText);
+                    homeAdapter.searchItems(s);
+                }
+
+
+            }
+        });
+        searchTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == 666) {
+                    if(homeAdapter != null){
+                        homeAdapter.searchItems(searchTxt.getText().toString());
+                    }
+                    return true;
                 }
                 return false;
             }
         });
-        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
+        searchTxt.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-            }
-        });
-        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (searchTxt.getRight() - searchTxt.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        searchTxt.setText("");
+                        searchTxt.clearFocus();
+                        if(homeAdapter != null){
+                            homeAdapter.searchItems("");
+                        }
+                        return true;
+                    }
+                }
                 return false;
             }
         });
@@ -304,6 +337,61 @@ public class TrackDetailFragment extends Fragment {
                                         }else if(type.equalsIgnoreCase("artist")){
                                             articleArray = api_result.getJSONArray("artist_list");
                                         }
+
+                                        Gson gson = new Gson();
+
+                                        if (articleArray.length() == 0){
+                                            trackList.clear();
+                                        }else {
+                                            for (int i = 0; i < articleArray.length(); i++) {
+                                                TrackModel topModel = gson.fromJson(articleArray.getJSONObject(i).toString(), TrackModel.class);
+                                                trackList.add(topModel);
+                                            }
+                                            createRV(trackList);
+                                        }
+                                        txt_song_count.setText(String.format(getResources().getString(R.string.song_count), trackList.size()));
+                                    } else {
+                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                    }
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                }
+                            } else {
+                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                CommonUtils.hideLoadingDialog();
+                            }
+                        }
+                    });
+        } else {
+            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+        }
+    }
+    private void getSearchMainTrackAll(){
+        trackList.clear();
+        String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+        String user_id = App.readSharedSetting(PRE_USER_ID, "");
+
+        if (App.isNetworkAvailable(getContext())) {
+            CommonUtils.showLoadingDialog(getActivity());
+            Ion.with(getContext())
+                    .load(GlobalConstants.SEARCH_MAIN)
+                    .setTimeout(CommonUtils.NETWORK_TIME)
+                    .setBodyParameter("id", p_listId)
+                    .setBodyParameter("type", "track")
+                    .setBodyParameter("user_id", user_id)
+                    .setBodyParameter("memberKey", member_key)
+                    .asString()
+                    .setCallback(new FutureCallback<String>() {
+                        @Override
+                        public void onCompleted(Exception e, String result) {
+                            if (e == null) {
+                                try {
+                                    CommonUtils.hideLoadingDialog();
+                                    JSONObject resultObj = new JSONObject(result);
+                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                        JSONObject api_result = resultObj.getJSONObject("api_result");
+                                        JSONArray articleArray = null;
+                                        articleArray = api_result.getJSONArray("track_list");
 
                                         Gson gson = new Gson();
 

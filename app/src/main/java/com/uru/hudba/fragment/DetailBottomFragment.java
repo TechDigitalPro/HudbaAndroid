@@ -507,19 +507,19 @@ public class DetailBottomFragment extends SuperBottomSheetFragment implements Vi
         return  getActivity().getResources().getDimension(R.dimen.padding_20);
     }
 
-    @Override
-    public int getPeekHeight(){
-        if(!TextUtils.isEmpty(cur_favorite) && cur_favorite.contains("download")){
-            Log.e("screen1" , "a");
-            return 1480;
-        }else if(cur_favorite.equalsIgnoreCase("favorite")){
-            Log.e("screen2" , "b");
-            return 1420;
-        }else{
-            Log.e("screen3" , "c");
-            return 1100;
-        }
-    }
+//    @Override
+//    public int getPeekHeight(){
+//        if(!TextUtils.isEmpty(cur_favorite) && cur_favorite.contains("download")){
+//            Log.e("screen1" , "a");
+//            return 1410;
+//        }else if(cur_favorite.equalsIgnoreCase("favorite")){
+//            Log.e("screen2" , "b");
+//            return 1420;
+//        }else{
+//            Log.e("screen3" , "c");
+//            return 1100;
+//        }
+//    }
     @Override
     public void onPause() {
         super.onPause();
