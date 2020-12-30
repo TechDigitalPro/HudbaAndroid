@@ -19,7 +19,7 @@
         android:layout_marginBottom="@dimen/margin_5">
         <androidx.cardview.widget.CardView
             android:id="@+id/card"
-            android:layout_width="160dp"
+            android:layout_width="match_parent"
             android:layout_height="90dp"
             app:cardCornerRadius="@dimen/margin_5"
             >
@@ -32,7 +32,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/aaa"
-                    android:scaleType="fitXY"
+                    android:scaleType="centerCrop"
                     android:layout_gravity="center" />
 
                 <TextView

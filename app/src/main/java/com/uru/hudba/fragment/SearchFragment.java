@@ -151,79 +151,6 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
             }
         });
 
-//        searchTxt.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                if(TextUtils.isEmpty(query)){
-//                    li_main.setVisibility(View.VISIBLE);
-//                    li_search.setVisibility(View.GONE);
-//                    li_empty.setVisibility(View.GONE);
-//                    li_loading.setVisibility(View.GONE);
-//                }
-//                else{
-//
-//                    li_main.setVisibility(View.GONE);
-//                    li_search.setVisibility(View.VISIBLE);
-//                    li_empty.setVisibility(View.GONE);
-//                    li_loading.setVisibility(View.VISIBLE);
-//                    onSearch(query);
-//                }
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                Log.e("query:", newText + "");
-//                if(TextUtils.isEmpty(newText)){
-//                    li_main.setVisibility(View.VISIBLE);
-//                    li_search.setVisibility(View.GONE);
-//                    li_empty.setVisibility(View.GONE);
-//                    li_loading.setVisibility(View.GONE);
-//                }
-////                else{
-////
-////                    li_main.setVisibility(View.GONE);
-////                    li_search.setVisibility(View.VISIBLE);
-////                    li_empty.setVisibility(View.GONE);
-////                    li_loading.setVisibility(View.VISIBLE);
-////                    onSearch(newText);
-////                }
-////                new Handler(getMainLooper()).postDelayed(()->{
-////                    onSearch(newText);
-////                }, 1000);
-//
-////                final Handler handler = new Handler();
-////                handler.postDelayed(new Runnable() {
-////                    @Override
-////                    public void run() {
-////                        if(TextUtils.isEmpty(newText)){
-////                            li_main.setVisibility(View.VISIBLE);
-////                            li_search.setVisibility(View.GONE);
-////                        }else{
-////                            li_main.setVisibility(View.GONE);
-////                            li_search.setVisibility(View.VISIBLE);
-////                            li_loading.setVisibility(View.VISIBLE);
-////                            onSearch(search_str);
-////                        }
-////                    }
-////                }, 500);
-//
-//                return false;
-//            }
-//        });
-//        searchTxt.setOnSearchClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.e("search:", searchTxt.getQuery().toString());
-//            }
-//        });
-//        searchTxt.setOnCloseListener(new SearchView.OnCloseListener() {
-//            @Override
-//            public boolean onClose() {
-//                return false;
-//            }
-//        });
-
 
         /******************Tracks**************/
         li_track = rootView.findViewById(R.id.li_track);
@@ -493,6 +420,12 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
         });
     }
 
+    public void updateAdapter(int pos, String value){
+        TrackModel tmp = track_list.get(pos);
+        tmp.setFavorite(value);
+        track_list.set(pos, tmp);
+        trackAdapter.notifyDataSetChanged();
+    }
     @Override
     public void onClick(View view) {
         switch (view.getId()){

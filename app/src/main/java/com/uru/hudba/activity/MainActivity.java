@@ -681,17 +681,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                                         String tmp_favorite = "";
                                         if(resultObj.getString("api_result").equalsIgnoreCase("1")){
                                             tmp_favorite = "download";
-                                            Constant.cur_download_trackid = "";
+                                            if(cur_download_type.equalsIgnoreCase("play_view")){
+                                                setFavorite(tmp_favorite, "play_view", Constant.playPos);
+                                            }else if(cur_download_type.equalsIgnoreCase("list_view")){
+                                                setFavorite(tmp_favorite, "list_view", Constant.cur_download_pos);
+                                            }else{
+                                                setFavorite(tmp_favorite, "", Constant.cur_download_pos);
+                                            }
                                             Constant.downloading_list.remove(0);
-                                            if(Constant.downloading_list.size()>0){
+                                            Constant.cur_download_trackid = "";
+                                            if(Constant.downloading_list.size() != 0){
                                                 download_action(Constant.downloading_list.get(0));
                                             }
+
                                         }
-                                        if(cur_download_type.equalsIgnoreCase("play_view")){
-                                            setFavorite(tmp_favorite, "play_view", Constant.playPos);
-                                        }else{
-                                            setFavorite(tmp_favorite, "", Constant.cur_download_pos);
-                                        }
+
 
 
                                     } else {
@@ -748,7 +752,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }
             Constant.cur_download_trackid = "";
             Constant.downloading_list.remove(0);
-            if(Constant.downloading_list.size()>0){
+            if(Constant.downloading_list.size()!=0){
                 download_action(Constant.downloading_list.get(0));
             }
         }
@@ -1028,6 +1032,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }else if(current_page.equalsIgnoreCase("search_detail")){
                 SearchDetailFragment searchDetailFragment =  (SearchDetailFragment) getCurrentFragment();
                 searchDetailFragment.updateAdapter(list_pos, favorite);
+            }else if(current_page.equalsIgnoreCase("search")){
+                SearchFragment searchFragment =  (SearchFragment) getCurrentFragment();
+                searchFragment.updateAdapter(list_pos, favorite);
             }
         }
         if(current_page.equalsIgnoreCase("track_detail")){

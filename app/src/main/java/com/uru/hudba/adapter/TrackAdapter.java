@@ -62,9 +62,12 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
                         TrackModel tmp = reviewList.get(i);
                         tmp.setFavorite("download");
                         reviewList.set(i, tmp);
+                        notifyItemRangeChanged(i, i+1);
+                        notifyDataSetChanged();
                     }
                 }
             }
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -160,24 +163,17 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
         if(Constant.cur_track_id.equalsIgnoreCase(item.getTrack_id())){
             holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
         }
-
-
-
-
-//        if(!TextUtils.isEmpty(item.getFavorite()) && item.getFavorite().contains("copy")){
-//            holder.rm_download_loading.setVisibility(View.VISIBLE);
-//            holder.rm_num.setVisibility(View.GONE);
-//        }else{
-//            holder.rm_download_loading.setVisibility(View.GONE);
-//            holder.rm_num.setVisibility(View.VISIBLE);
-//        }
-        if(Constant.downloading_list != null && Constant.downloading_list.size()>0){
+        if(Constant.downloading_list != null && Constant.downloading_list.size()!=0){
+            Log.e("size:", Constant.downloading_list.size() + "");
             for(int i = 0; i< Constant.downloading_list.size(); i++){
                 if(Constant.downloading_list.get(i).getTrackModel().getTrack_id().equalsIgnoreCase(item.getTrack_id())){
                     holder.rm_download_loading.setVisibility(View.VISIBLE);
                     holder.rm_num.setVisibility(View.GONE);
                 }
             }
+        }else{
+            holder.rm_download_loading.setVisibility(View.GONE);
+            holder.rm_num.setVisibility(View.VISIBLE);
         }
         holder.rm_num.setText(String.format(Locale.US, "%02d", holder.getLayoutPosition() + 1));
 
