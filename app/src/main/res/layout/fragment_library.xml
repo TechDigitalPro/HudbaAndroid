@@ -65,7 +65,7 @@
                     android:layout_marginStart="@dimen/margin_20"
                     android:layout_marginEnd="@dimen/margin_20"
                     android:background="@drawable/bk_search_bar">
-                    <AutoCompleteTextView
+                    <EditText
                         android:id="@+id/search_txt"
                         android:layout_width="match_parent"
                         android:layout_centerInParent="true"
@@ -78,7 +78,7 @@
                         android:paddingLeft="@dimen/margin_15"
                         android:paddingRight="@dimen/padding_15"
                         android:drawableEnd="@drawable/ic_close"
-                        android:hint="Search playlists in your library..."
+                        android:hint="@string/search_playlist"
                         android:paddingStart="@dimen/padding_15"
                         android:imeOptions="actionSearch"
                         android:imeActionId="666"

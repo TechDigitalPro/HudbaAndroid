@@ -87,7 +87,6 @@
                                 android:layout_height="wrap_content"
                                 android:textSize="@dimen/text_18"
                                 android:textColor="@color/white_color"
-                                android:text="Jamal"
                                 />
                             <TextView
                                 android:layout_width="match_parent"

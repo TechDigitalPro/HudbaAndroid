@@ -93,17 +93,17 @@ public class DetailBottomFragment extends SuperBottomSheetFragment implements Vi
         li_downloading = rootView.findViewById(R.id.li_downloading);
 
 
-        if(!((MainActivity)getActivity()).current_page.equalsIgnoreCase("playlist_track_detail")){
-            li_add_playlist.setVisibility(View.GONE);
-        }
+//        if(!((MainActivity)getActivity()).current_page.equalsIgnoreCase("playlist_track_detail")){
+//            li_add_playlist.setVisibility(View.GONE);
+//        }
         mPlaylist.clear();
 
-        if(((MainActivity)getActivity()).current_page.equalsIgnoreCase("playlist_track_detail")){
-            txt_playlist.setText(R.string.remove_track_playlist);
-        }else{
-            txt_playlist.setText(R.string.add_playlist);
-        }
-
+//        if(((MainActivity)getActivity()).current_page.equalsIgnoreCase("playlist_track_detail")){
+//            txt_playlist.setText(R.string.remove_track_playlist);
+//        }else{
+//            txt_playlist.setText(R.string.add_playlist);
+//        }
+        li_add_playlist.setVisibility(View.GONE);
         if(Constant.downloading_list != null && Constant.downloading_list.size()>0){
             for(int i = 0; i< Constant.downloading_list.size(); i++){
                 if(Constant.downloading_list.get(i).getTrackModel().getTrack_id().equalsIgnoreCase(trackModel.getTrack_id())){
@@ -126,7 +126,7 @@ public class DetailBottomFragment extends SuperBottomSheetFragment implements Vi
                     txt_download.setText(R.string.download);
                 }else{
                     cur_favorite = "download";
-                    li_favorite.setVisibility(View.VISIBLE);
+                    li_favorite.setVisibility(View.GONE);
                     txt_download.setText(R.string.remove_library);
                 }
 //                li_rename.setVisibility(View.VISIBLE);

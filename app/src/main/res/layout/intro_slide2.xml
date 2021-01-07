@@ -19,7 +19,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Trends and mixes."
+            android:text="@string/intro2"
             android:gravity="center"
             android:textColor="@color/white_color"
             android:textSize="@dimen/intro_title_size"
@@ -33,7 +33,7 @@
             android:gravity="center"
             android:textColor="@color/white_color"
             android:textSize="@dimen/intro_text_size"
-            android:text="Listen to the continuously updated trends and charts. From all over the world."/>
+            android:text="@string/intro2_bottom"/>
 
     </LinearLayout>
 </RelativeLayout>

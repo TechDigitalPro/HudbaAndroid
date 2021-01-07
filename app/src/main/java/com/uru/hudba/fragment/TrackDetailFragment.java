@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -64,7 +65,7 @@ public class TrackDetailFragment extends Fragment {
     private String p_listId = "", title = "", type = "", image_url = "";
     private ArrayList<TrackModel> trackList = new ArrayList<>();
     private TrackAdapter homeAdapter;
-    private AutoCompleteTextView searchTxt;
+    private EditText searchTxt;
 
     private CollapsingToolbarLayoutState state;
 

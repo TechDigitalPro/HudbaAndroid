@@ -65,7 +65,7 @@
                         android:paddingLeft="@dimen/margin_15"
                         android:textSize="@dimen/text_15"
                         android:paddingRight="@dimen/margin_15"
-                        android:hint="Type a name you like..."
+                        android:hint="@string/name_type"
                         android:textColorHint="@color/grey_dark"
                         android:layout_marginTop="@dimen/margin_20"/>
                     <EditText
@@ -78,7 +78,7 @@
                         android:paddingRight="@dimen/margin_15"
                         android:background="@drawable/bg_edit"
                         android:textColorHint="@color/grey_dark"
-                        android:hint="Fill with a nice bio..."
+                        android:hint="@string/subname"
                         android:layout_marginTop="@dimen/margin_10"/>
                 </LinearLayout>
 
@@ -102,7 +102,7 @@
                         android:id="@+id/cancel"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="NO"
+                        android:text="@string/no"
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:padding="5dp"
@@ -121,7 +121,7 @@
                         android:id="@+id/ok"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="YES"
+                        android:text="@string/yes"
                         android:padding="5dp"
                         android:layout_gravity="center"
                         android:gravity="center"

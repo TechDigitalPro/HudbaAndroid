@@ -60,7 +60,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
                 for(int i = 0; i < reviewList.size(); i++){
                     if(reviewList.get(i).getTrack_id().equalsIgnoreCase(trackid)){
                         TrackModel tmp = reviewList.get(i);
-                        tmp.setFavorite("download");
+                        tmp.setFavorite("");
                         reviewList.set(i, tmp);
                         notifyItemRangeChanged(i, i+1);
                         notifyDataSetChanged();
@@ -162,6 +162,8 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
         }
         if(Constant.cur_track_id.equalsIgnoreCase(item.getTrack_id())){
             holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
+        }else{
+            holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
         }
         if(Constant.downloading_list != null && Constant.downloading_list.size()!=0){
             Log.e("size:", Constant.downloading_list.size() + "");

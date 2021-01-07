@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -58,7 +59,7 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
     private View rootView;
     private ImageView btn_profile;
     private RecyclerView rv_search;
-    private AutoCompleteTextView searchTxt;
+    private EditText searchTxt;
 
     private ArrayList<SearchModel> searchList = new ArrayList<>();
     private SearchAdapter searchAdapter;

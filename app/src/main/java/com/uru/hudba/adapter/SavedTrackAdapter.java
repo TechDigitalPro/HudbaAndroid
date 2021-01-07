@@ -2,6 +2,7 @@ package com.uru.hudba.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,6 +130,7 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
             }
             if(!TextUtils.isEmpty(item.getFavorite()) && item.getFavorite().contains("download")){
                 holder.rm_num.setTextColor(context.getResources().getColor(R.color.green_dark));
+                Log.e("play_color", "0");
             }else{
                 holder.rm_num.setTextColor(context.getResources().getColor(R.color.white_color));
             }
@@ -154,16 +156,20 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
                 if(getPosition("common") == position) {
                     if(checked){
                         holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
+                        Log.e("play_color", "1");
                     }else{
                         holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
                     }
                 }else if(getPosition("common") != position){
                     holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
                 }
+            }else{
+                holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
             }
 
             if(Constant.cur_track_id.equalsIgnoreCase(item.getTrack_id())){
                 holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
+                Log.e("play_color", "2");
             }
             if(Constant.downloading_list != null && Constant.downloading_list.size()>0){
                 for(int i = 0; i< Constant.downloading_list.size(); i++){
@@ -172,6 +178,9 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
                         holder.rm_num.setVisibility(View.GONE);
                     }
                 }
+            }else{
+                holder.rm_download_loading.setVisibility(View.GONE);
+                holder.rm_num.setVisibility(View.VISIBLE);
             }
             holder.rm_num.setText(String.format(Locale.US, "%02d", holder.getLayoutPosition() + 1));
         }

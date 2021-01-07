@@ -31,7 +31,6 @@
                 android:textSize="@dimen/text_15"
                 android:textStyle="bold"
                 android:textColor="@color/grey_dark"
-                android:text="01"
                 />
         </LinearLayout>
         <LinearLayout

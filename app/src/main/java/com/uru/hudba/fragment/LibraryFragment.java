@@ -75,7 +75,7 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
     private RelativeLayout add_playlist;
     private PlayListAdapter playlistAdapter;
     private LinearLayout li_saved, li_playlist, li_list;
-    private AutoCompleteTextView searchTxt;
+    private EditText searchTxt;
     private ArrayList<PlayListModel> playList = new ArrayList<>();
     private int saved_song_cnt = 0;
     private String tmp_image_path = "";
@@ -228,7 +228,7 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
             playList.clear();
             li_list.setVisibility(View.GONE);
             li_playlist.setVisibility(View.GONE);
-            saved_song_cnt = Integer.valueOf(App.readSharedSetting("song_cnt", ""));
+            saved_song_cnt = Integer.valueOf(App.readSharedSetting("song_cnt", "0"));
             tmp_image_path = App.readSharedSetting("image_path", "");
             txt_song_cnt.setText(saved_song_cnt + " songs");
             if (!TextUtils.isEmpty(tmp_image_path)) {

@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import androidx.appcompat.widget.SearchView;
 import android.widget.TextView;
@@ -47,7 +48,7 @@ public class SelectAllFragment extends BaseFragment {
     private ImageView backBtn;
     private TextView tvTitle;
     private RecyclerView rv_all;
-    private AutoCompleteTextView searchTxt;
+    private EditText searchTxt;
 
     private String type = "", data_type = "", keyword = "";
     private ArrayList<AlbumModel> albumList = new ArrayList<>();

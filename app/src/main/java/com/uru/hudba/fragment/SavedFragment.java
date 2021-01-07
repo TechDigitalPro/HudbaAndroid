@@ -40,6 +40,7 @@ import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.SavedTrackAdapter;
 import com.uru.hudba.constant.CommonUtils;
+import com.uru.hudba.constant.Constant;
 import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.TrackModel;
 
@@ -68,7 +69,7 @@ public class SavedFragment extends Fragment {
     private SavedTrackAdapter homeAdapter;
     private int saved_song_cnt = 0;
     private CollapsingToolbarLayoutState state;
-    private AutoCompleteTextView searchTxt;
+    private EditText searchTxt;
 
     private enum CollapsingToolbarLayoutState {
         EXPANDED,
@@ -314,7 +315,6 @@ public class SavedFragment extends Fragment {
             tvContentTitle.setText(getResources().getString(R.string.favorite_track) + " - " +saved_song_cnt);
             tvTitle.setText(getResources().getString(R.string.favorite_track) + " - " +saved_song_cnt);
         }
-
     }
     private void saveData(){
         Gson tmp_gson = new Gson();
@@ -353,12 +353,8 @@ public class SavedFragment extends Fragment {
                                             if(mp3_file.exists()) {
                                                 mp3_file.delete();
                                             }
-                                            trackList.remove(pos);
-                                            homeAdapter.notifyDataSetChanged();
-                                            saveData();
-                                            saved_song_cnt = trackList.size();
-                                            setTextTitle();
-                                            ((MainActivity)getActivity()).setTrackList(trackList);
+                                            updateList(pos);
+
                                         } else {
                                             ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
                                         }
@@ -378,6 +374,23 @@ public class SavedFragment extends Fragment {
         }
 
 
+    }
+    public void updateList(int pos){
+        trackList.remove(pos);
+        if(homeAdapter.getPosition("common") != -1){
+            if(pos < homeAdapter.getPosition("common")){
+                homeAdapter.setPosition(homeAdapter.getPosition("common") - 1, "common");
+            }else{
+                homeAdapter.setPosition(-1, "common");
+            }
+        }
+        homeAdapter.notifyDataSetChanged();
+//                                            Constant.arrayList_play.clear();
+//                                            Constant.arrayList_play.addAll(trackList);
+        saveData();
+        saved_song_cnt = trackList.size();
+        setTextTitle();
+        ((MainActivity)getActivity()).setTrackList(trackList);
     }
     public void renameSong(int pos){
         try {

@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Hudba</string>
     <string name="facebook_app_id">1775668682601171</string>
-    <string name="fb_login_protocol_scheme">fb1775668682601171</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb1775668682601171</string>
 
-    <string name="txt_login">log in</string>
+    <string name="txt_login">Log in</string>
     <string name="txt_home">Home</string>
     <string name="txt_top_playlist">Top playlists</string>
     <string name="daily">Daily mixes</string>
@@ -103,6 +103,41 @@
     <string name="nothing_song">Nothing found</string>
     <string name="nothing_song1">This search returned no results.</string>
     <string name="downloaded">The song is being downloaded</string>
+    <string name="auth_title">One account, all your music.</string>
+    <string name="face_sign">Sign in with Facebook</string>
+    <string name="signup">Sign up with Hudba</string>
+    <string name="hadaccount">Already have an account ?</string>
+    <string name="login">Log in</string>
+    <string name="welcome">Welcome</string>
+    <string name="yourmail">Your Email</string>
+    <string name="password">Password</string>
+    <string name="forgotpass">Forgot password ?</string>
+    <string name="signup_txt">Sign up</string>
+    <string name="txt_fname">First Name</string>
+    <string name="txt_lastname">Last Name</string>
+    <string name="repass">Repeat Password</string>
+    <string name="agree_txt1">By continuing, you agree to the</string>
+    <string name="term_txt">Terms and Conditions</string>
+    <string name="txt_privacy">Privacy Policy</string>
+    <string name="confirm">Confirm</string>
+    <string name="exit_confirm">Are you sure you want to Exit?</string>
+    <string name="no">NO</string>
+    <string name="yes">YES</string>
+    <string name="name_type">Type a name you like...</string>
+    <string name="subname">Fill with a nice bio...</string>
+    <string name="search_playlist">Search playlists in your library...</string>
+    <string name="play">Play</string>
+    <string name="search_playlist1">Songs, playlist and artists.</string>
+    <string name="intro1">Unlimited music. Free. Forever.</string>
+    <string name="intro1_bottom">Over 150 million songs, your own playlists and favorite artists.</string>
+    <string name="intro2">Trends and mixes.</string>
+    <string name="intro2_bottom">Listen to the continuously updated trends and charts. From all over the world.</string>
+    <string name="intro3">All your world. Here.</string>
+    <string name="intro3_bottom">Import your songs, add them to your library and listen offline.</string>
+    <string name="intro4">Unlimited devices.</string>
+    <string name="intro4_bottom">One account, all your library synced and saved on unlimited devices.</string>
+    <string name="msg_file_no1">File Source Get fail, Please fix this song after connect network</string>
+    <string name="msg_file_no2">File Source Get fail</string>
 
 
 </resources>

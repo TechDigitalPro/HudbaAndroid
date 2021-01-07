@@ -352,7 +352,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_20"
-                android:paddingBottom="@dimen/margin_60"
                 android:visibility="gone"
                 android:orientation="vertical">
 
@@ -435,7 +434,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Play"
+                android:text="@string/play"
                 android:gravity="center"
                 android:textAllCaps="true"
                 android:textColor="@color/black_color"

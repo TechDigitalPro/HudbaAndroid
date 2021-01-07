@@ -52,7 +52,7 @@ public class NotiService extends IntentService {
      */
 
 
-
+    private Toast errToast;
     private boolean isNewSong = false;
     NotificationManager mNotificationManager;
     NotificationCompat.Builder notification;
@@ -159,6 +159,7 @@ public class NotiService extends IntentService {
                     mediaPlayer.setDataSource(url);
                     mediaPlayer.prepareAsync();
                 } catch (IOException e) {
+                    Toast.makeText(getApplicationContext(), R.string.msg_file_no1, Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
 
@@ -176,8 +177,15 @@ public class NotiService extends IntentService {
                 mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mp, int what, int extra) {
-//                        Toast.makeText(getApplicationContext(), "FileSource Get fail: Play next song automatically", Toast.LENGTH_SHORT).show();
-//                        next();
+
+//                        Log.e("toast", "aaa" + mp.getAudioSessionId());
+//                        if(errToast == null){
+//                            errToast = Toast.makeText(getApplicationContext(),"FileSource Get fail", Toast.LENGTH_LONG);
+//                            errToast.show();
+//                            mediaPlayer = null;
+//                        }
+
+                        //next();
                         return false;
                     }
                 });

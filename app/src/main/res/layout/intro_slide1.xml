@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Unlimited music. Free. Forever."
+            android:text="@string/intro1"
             android:gravity="center"
             android:textColor="@color/white_color"
             android:textSize="@dimen/intro_title_size"
@@ -34,7 +34,7 @@
             android:gravity="center"
             android:textColor="@color/white_color"
             android:textSize="@dimen/intro_text_size"
-            android:text="Over 150 million songs, your own playlists and favorite artists."/>
+            android:text="@string/intro1_bottom"/>
 
     </LinearLayout>
 </RelativeLayout>

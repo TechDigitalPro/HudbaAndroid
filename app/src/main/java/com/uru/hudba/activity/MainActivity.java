@@ -362,8 +362,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private void downloadInit(){
         PRDownloader.initialize(getApplicationContext());
         PRDownloaderConfig config = PRDownloaderConfig.newBuilder()
-                .setReadTimeout(30000)
-                .setConnectTimeout(30000)
+                .setReadTimeout(150000)
+                .setConnectTimeout(150000)
                 .build();
         PRDownloader.initialize(getApplicationContext(), config);
     }
@@ -405,7 +405,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
                     @Override
                     public void onError(Error error) {
-
+                        showErrorMessages(error.getServerErrorMessage());
+                        Constant.cur_download_trackid = "";
+                        Constant.downloading_list.remove(0);
+                        if(Constant.downloading_list.size()>0){
+                            download_action(Constant.downloading_list.get(0));
+                        }
                     }
 
                 });
@@ -448,7 +453,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
                     @Override
                     public void onError(Error error) {
-
+                        showErrorMessages(error.getServerErrorMessage());
+                        hideDownloading();
+                        Constant.cur_download_trackid = "";
+                        Constant.downloading_list.remove(0);
+                        if(Constant.downloading_list.size()>0){
+                            download_action(Constant.downloading_list.get(0));
+                        }
                     }
 
                 });
@@ -464,41 +475,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void downloadVideoFail(String fail) {
 
-        if(current_page.equalsIgnoreCase("track_detail")){
-            TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("saved_song")){
-            SavedFragment fragment = (SavedFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("playlist_track_detail")){
-            PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
-        if(current_page.equalsIgnoreCase("search_detail")){
-            SearchFragment fragment = (SearchFragment) getCurrentFragment();
-            if(fragment.getAdapter() != null){
-                fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                fragment.getAdapter().notifyDataSetChanged();
-            }
-        }
+        hideDownloading();
         Constant.cur_download_trackid = "";
         Constant.downloading_list.remove(0);
         if(Constant.downloading_list.size()>0){
@@ -513,6 +490,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void getLinkFail() {
 
+        hideDownloading();
+        Constant.cur_download_trackid = "";
+        Constant.downloading_list.remove(0);
+        if(Constant.downloading_list.size()>0){
+            download_action(Constant.downloading_list.get(0));
+        }
+
+        showErrorMessages(R.string.msg_file_no2);
+
+    }
+
+    /*************************download***************************************/
+    private void hideDownloading(){
         if(current_page.equalsIgnoreCase("track_detail")){
             TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
             if(fragment.getAdapter() != null){
@@ -548,17 +538,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 fragment.getAdapter().notifyDataSetChanged();
             }
         }
-        Constant.cur_download_trackid = "";
-        Constant.downloading_list.remove(0);
-        if(Constant.downloading_list.size()>0){
-            download_action(Constant.downloading_list.get(0));
-        }
-
-        showErrorMessages("FileSource Get fail: Please try again");
-
     }
-
-    /*************************download***************************************/
     private void download_action(DownloadModel downloadModel){
         cur_download_trackid = downloadModel.getTrackModel().getTrack_id();
         cur_download_track = downloadModel.getTrackModel();
@@ -613,6 +593,60 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 if(fragment.getAdapter() != null){
                     fragment.getAdapter().notifyDataSetChanged();
                 }
+            }
+        }else if(action.equalsIgnoreCase("remove")){
+            try {
+                String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+                String user_id = App.readSharedSetting(PRE_USER_ID, "");
+
+                if (App.isNetworkAvailable(MainActivity.this)) {
+                    Ion.with(MainActivity.this)
+                            .load(GlobalConstants.DELETE_SAVED_SONG + member_key)
+                            .setTimeout(CommonUtils.NETWORK_TIME)
+                            .setBodyParameter("user_id", user_id)
+                            .setBodyParameter("track_id", cur_track.getTrack_id())
+                            .setBodyParameter("type", cur_track.getFavorite())
+                            .asString()
+                            .setCallback(new FutureCallback<String>() {
+                                @Override
+                                public void onCompleted(Exception e, String result) {
+                                    if (e == null) {
+                                        try {
+                                            JSONObject resultObj = new JSONObject(result);
+                                            if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                                String img_folder = getFilesDir().getAbsolutePath() + File.separator + "image";
+                                                File img_file = new File(img_folder, cur_track.getTrack_id() + ".jpg");
+                                                if(img_file.exists()) {
+                                                    img_file.delete();
+                                                }
+                                                String mp3_folder = getFilesDir().getAbsolutePath() + File.separator + "video";
+                                                File mp3_file = new File(mp3_folder, cur_track.getTrack_id() + ".mp3");
+                                                if(mp3_file.exists()) {
+                                                    mp3_file.delete();
+                                                }
+                                                if(current_page.equalsIgnoreCase("saved_song")){
+                                                    SavedFragment savedFragment = (SavedFragment) getCurrentFragment();
+                                                    savedFragment.updateList(list_pos);
+                                                }
+//                                                else if(current_page.equalsIgnoreCase("home")){
+//                                                    HomeFragment homeFragment = (HomeFragment) getCurrentFragment();
+//                                                }
+                                            } else {
+                                                showErrorMessages(resultObj.getString("err_msg"));
+                                            }
+                                        } catch (JSONException ex) {
+                                            ex.printStackTrace();
+                                        }
+                                    } else {
+                                        showErrorMessages(R.string.txt_server_error);
+                                    }
+                                }
+                            });
+                } else {
+                    showErrorMessages(R.string.txt_network_error);
+                }
+            } catch (Exception e) {
+                showErrorMessages(e.getMessage());
             }
         }else{
             cur_download_track = cur_track;
@@ -688,8 +722,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                                             }else{
                                                 setFavorite(tmp_favorite, "", Constant.cur_download_pos);
                                             }
-                                            Constant.downloading_list.remove(0);
-                                            Constant.cur_download_trackid = "";
+                                            if(Constant.downloading_list != null && Constant.downloading_list.size() != 0){
+                                                Constant.downloading_list.remove(0);
+                                                Constant.cur_download_trackid = "";
+                                            }
                                             if(Constant.downloading_list.size() != 0){
                                                 download_action(Constant.downloading_list.get(0));
                                             }
@@ -715,41 +751,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     });
         } else {
             showErrorMessages(R.string.txt_network_error);
-            if(current_page.equalsIgnoreCase("track_detail")){
-                TrackDetailFragment fragment = (TrackDetailFragment) getCurrentFragment();
-                if(fragment.getAdapter() != null){
-                    fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                    fragment.getAdapter().notifyDataSetChanged();
-                }
-            }
-            if(current_page.equalsIgnoreCase("saved_song")){
-                SavedFragment fragment = (SavedFragment) getCurrentFragment();
-                if(fragment.getAdapter() != null){
-                    fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                    fragment.getAdapter().notifyDataSetChanged();
-                }
-            }
-            if(current_page.equalsIgnoreCase("playlist_track_detail")){
-                PlaylistTrackDetailFragment fragment = (PlaylistTrackDetailFragment) getCurrentFragment();
-                if(fragment.getAdapter() != null){
-                    fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                    fragment.getAdapter().notifyDataSetChanged();
-                }
-            }
-            if(current_page.equalsIgnoreCase("search")){
-                SearchFragment fragment = (SearchFragment) getCurrentFragment();
-                if(fragment.getAdapter() != null){
-                    fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                    fragment.getAdapter().notifyDataSetChanged();
-                }
-            }
-            if(current_page.equalsIgnoreCase("search_detail")){
-                SearchFragment fragment = (SearchFragment) getCurrentFragment();
-                if(fragment.getAdapter() != null){
-                    fragment.getAdapter().unsetDownloading(Constant.cur_download_trackid);
-                    fragment.getAdapter().notifyDataSetChanged();
-                }
-            }
+            hideDownloading();
             Constant.cur_download_trackid = "";
             Constant.downloading_list.remove(0);
             if(Constant.downloading_list.size()!=0){
@@ -764,10 +766,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         Constant.arrayList_play.addAll(trackList);
     }
     public void initPlayer(int track_pos){
-        if(!Constant.arrayList_play.get(track_pos).getTrack_id().equalsIgnoreCase(Constant.cur_track_id)){
-            stopPlayer();
-        }
         try {
+            if(!Constant.arrayList_play.get(track_pos).getTrack_id().equalsIgnoreCase(Constant.cur_track_id)){
+                stopPlayer();
+            }
             cur_track = Constant.arrayList_play.get(track_pos);
 
             if(!Constant.cur_track_id.equalsIgnoreCase(cur_track.getTrack_id())){
@@ -803,9 +805,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     Glide.with(MainActivity.this)
                             .load(imgFile)
                             .override(70, 70)
+                            .placeholder(R.drawable.app_logo)
                             .into(mini_image);
                     Glide.with(MainActivity.this)
                             .load(imgFile)
+                            .placeholder(R.drawable.app_logo)
                             .into(detail_cover_image);
                 }else{
                     String cur_playing_mode = App.readSharedSetting(PRE_PLAYING_MODE, "photo");
@@ -823,9 +827,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                             Glide.with(MainActivity.this)
                                     .load(cur_track.getCover_image())
                                     .override(70, 70)
+                                    .placeholder(R.drawable.app_logo)
                                     .into(mini_image);
                             Glide.with(MainActivity.this)
                                     .load(cur_track.getCover_image())
+                                    .placeholder(R.drawable.app_logo)
                                     .into(detail_cover_image);
                         }catch (Exception e){
                             e.printStackTrace();
@@ -1383,6 +1389,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 break;
             case R.id.close:
                 songSlideView.animateOut();
+                mini_panel.setVisibility(View.VISIBLE);
+                mBottomNav.setVisibility(View.VISIBLE);
                 break;
             case R.id.more:
                 try {
@@ -1400,7 +1408,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_song)));
                 break;
             case R.id.main_favorite:
-                add_favorite(cur_track, "play_view", Constant.playPos);
+                if(!TextUtils.isEmpty(cur_track.getFavorite())){
+                    add_download(cur_track, cur_track.getVideoId(), cur_track.getFavorite(), Constant.playPos, "remove");
+                    setFavorite("", "play_view", Constant.playPos);
+                }else{
+                    add_favorite(cur_track, "play_view", Constant.playPos);
+                }
                 break;
             case R.id.shuffle:
                 if (Constant.isSuffle) {
@@ -1445,6 +1458,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 min_loading.setVisibility(View.GONE);
                 detail_pause.setImageResource(R.drawable.ic_pause);
                 mini_pause.setImageResource(R.drawable.ic_pause);
+
+                detail_seekbar.setMax(100);
+                min_progress.setMax(100);
                 seekUpdation();
             }
 
