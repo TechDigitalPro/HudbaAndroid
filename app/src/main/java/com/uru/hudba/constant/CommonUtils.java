@@ -3,19 +3,26 @@ package com.uru.hudba.constant;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 
 import com.uru.hudba.R;
+import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.model.UserModel;
 
 import java.io.File;
@@ -63,6 +70,98 @@ public class CommonUtils {
         }
     }
 
+    public static void showReviewDlg(final Activity activity){
+        View dialogView = activity.getLayoutInflater().inflate(R.layout.dlg_rate, null);
+
+        final android.app.AlertDialog dlg = new android.app.AlertDialog.Builder(activity)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        dlg.setCanceledOnTouchOutside(true);
+        final ImageView btn_close = dialogView.findViewById(R.id.btn_close);
+        btn_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dlg.dismiss();
+            }
+        });
+        final ImageButton alert_BTN_star_1 = dialogView.findViewById(R.id.alert_BTN_star_1);
+        final ImageButton alert_BTN_star_2 = dialogView.findViewById(R.id.alert_BTN_star_2);
+        final ImageButton alert_BTN_star_3 = dialogView.findViewById(R.id.alert_BTN_star_3);
+        final ImageButton alert_BTN_star_4 = dialogView.findViewById(R.id.alert_BTN_star_4);
+        final ImageButton alert_BTN_star_5 = dialogView.findViewById(R.id.alert_BTN_star_5);
+        final ImageButton[] stars = new ImageButton[]{alert_BTN_star_1, alert_BTN_star_2, alert_BTN_star_3, alert_BTN_star_4, alert_BTN_star_5};
+
+        final int drawable_active = R.drawable.ic_star_active;
+        final int drawable_deactive = R.drawable.ic_star_deactive;
+        int openStoreFromXStars = 5;
+
+        View.OnClickListener starsClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int clickedIndex = -1;
+                int selectedStar = 0;
+                for (int i = 0; i < stars.length; i++) {
+                    if (stars[i].getId() == v.getId()) {
+                        clickedIndex = i;
+                        break;
+                    }
+                }
+
+                if (clickedIndex != -1) {
+                    for (int i = 0; i <= clickedIndex; i++) {
+                        stars[i].setImageResource(drawable_active);
+                    }
+                    for (int i = clickedIndex + 1; i < stars.length; i++) {
+                        stars[i].setImageResource(drawable_deactive);
+                    }
+                }
+
+                selectedStar = clickedIndex + 1;
+                final Handler handler = new Handler(Looper.getMainLooper());
+                int finalSelectedStar = selectedStar;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        int _openStoreFrom_Stars = openStoreFromXStars;
+                        if (openStoreFromXStars < 1 || openStoreFromXStars > 5) {
+                            _openStoreFrom_Stars = 4;
+                        }
+
+                        if (openStoreFromXStars != -1 && finalSelectedStar >= _openStoreFrom_Stars) {
+                            if (finalSelectedStar >= _openStoreFrom_Stars) {
+                                final String appPackageName = activity.getPackageName(); // getPackageName() from Context or Activity object
+                                try {
+                                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                                }
+                                catch (android.content.ActivityNotFoundException anfe) {
+                                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                }
+
+                            } else {
+                                ((MainActivity)activity).showMessages(R.string.thanks_feedback);
+                            }
+                            dlg.dismiss();
+                        } else {
+                            ((MainActivity)activity).showMessages(R.string.thanks_feedback);
+                            dlg.dismiss();
+                        }
+                    }
+                }, 1000);
+
+            }
+        };
+
+        alert_BTN_star_1.setOnClickListener(starsClickListener);
+        alert_BTN_star_2.setOnClickListener(starsClickListener);
+        alert_BTN_star_3.setOnClickListener(starsClickListener);
+        alert_BTN_star_4.setOnClickListener(starsClickListener);
+        alert_BTN_star_5.setOnClickListener(starsClickListener);
+        dlg.setCanceledOnTouchOutside(false);
+        dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dlg.show();
+    }
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
@@ -149,7 +248,6 @@ public class CommonUtils {
         try {
             ExifInterface ei = new ExifInterface(imgFile.getAbsolutePath());
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            Log.e("***", "fixPhotoOrientation: " + orientation);
             switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
                     return rotateImage(bmp, 90);

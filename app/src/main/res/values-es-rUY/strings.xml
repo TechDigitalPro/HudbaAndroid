@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Hudba</string>
     <string name="facebook_app_id">1775668682601171</string>
-
     <string name="txt_login">Iniciar sesión</string>
     <string name="txt_home">Inicio</string>
     <string name="txt_top_playlist">Top playlists</string>
@@ -36,8 +35,8 @@
     <string name="msg_input_password">Por favor ingrese la contraseña</string>
     <string name="msg_input_confirmpassword">Por favor ingrese la contraseña</string>
     <string name="msg_valid_confirmpassword">Confirme la contraseña</string>
-    <string name="txt_server_error">Error del Servidor</string>
-    <string name="txt_network_error">Error de red</string>
+    <string name="txt_server_error">Confirme su conexión de red</string>
+    <string name="txt_network_error">Confirme su conexión de red</string>
     <string name="msg_logout">¿Estás seguro de que quieres cerrar sesión?</string>
     <string name="song_count">- %1$d Canciones</string>
     <string name="search">Buscar</string>
@@ -137,5 +136,18 @@
     <string name="intro4_bottom">Una cuenta, toda su biblioteca sincronizada y guardada en dispositivos ilimitados.</string>
     <string name="msg_file_no1">Error de obtención de la fuente del archivo, corrija esta canción después de conectar la red</string>
     <string name="msg_file_no2">Error de obtención de origen de archivo</string>
-
+    <string name="camera_permission">Se necesita permiso de la cámara para tomar una foto.</string>
+    <string name="camera_write_permission">Se necesitan permisos de cámara y escritura para tomar una foto.</string>
+    <string name="rate_us">Nos califica</string>
+    <string name="rate_us_msg">Esperemos que haya disfrutado con nosotros hoy.\nSi te ha gustado califícalo, nos ayudará a crecer</string>
+    <string name="continue_str">Seguir</string>
+    <string name="thanks_feedback">Gracias por la respuesta</string>
+    <string name="download_source_fail">No es posible descargar esta canción en este momento, inténtelo más tarde</string>
+    <string name="remove_favorite_msg">Se eliminará de tus canciones guardadas y de todas tus listas de reproducción. ¿Estás seguro?</string>
+    <string name="remove_all">Eliminar todo</string>
+    <string name="confirm_pass">Confirmar Contraseña</string>
+    <string name="reset_password">Restablecer la contraseña</string>
+    <string name="new_password">Nueva contraseña</string>
+    <string name="reset">Reiniciar</string>
+    <string name="invalid_cur_pass">Confirme la contraseña actual</string>
 </resources>

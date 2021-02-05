@@ -8,7 +8,7 @@
     <color name="bottom_nav_bg_color">#1e1e26</color>
 
     <color name="bottom_nav_normal_color">#808080</color>
-
+    <color name="cardview_background">#DDFCF8F8</color>
     <color name="transparent_color">#00FFFFFF</color>
     <color name="orange_black">#F15A29</color>
     <color name="orange_light">#F58421</color>

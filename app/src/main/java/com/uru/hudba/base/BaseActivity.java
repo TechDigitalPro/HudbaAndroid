@@ -72,8 +72,12 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void hideProgressDialog() {
-        if (mProgress != null && mProgress.isShowing())
-            mProgress.dismiss();
+        try {
+            if (mProgress != null && mProgress.isShowing())
+                mProgress.dismiss();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void animateVisibilityShown(View view) {
@@ -108,7 +112,7 @@ public class BaseActivity extends AppCompatActivity {
         try {
 
             boolean isPop = false;
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                 isPop = true;
                 getSupportFragmentManager().popBackStack();
             }

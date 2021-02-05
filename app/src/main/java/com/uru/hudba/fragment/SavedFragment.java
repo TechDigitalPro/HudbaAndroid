@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,26 +19,23 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.SavedTrackAdapter;
+import com.uru.hudba.base.BaseFragment;
 import com.uru.hudba.constant.CommonUtils;
-import com.uru.hudba.constant.Constant;
 import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.TrackModel;
 
@@ -51,14 +46,19 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 
+import static com.uru.hudba.constant.GlobalConstants.PRE_FAVDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_IMAGEPATH;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
+import static com.uru.hudba.constant.GlobalConstants.PRE_SAVEDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_SONGCNT;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
-public class SavedFragment extends Fragment {
+public class SavedFragment extends BaseFragment {
     private View rootView;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
-    private CardView toolbarShuffle, mainShuffle;
+    private CardView toolbarShuffle, mainShuffle, toolbarRemove, mainRemove;
+    private LinearLayout li_toolbar, li_mainbar;
     private ImageView content_image, backBtn;
     private TextView tvContentTitle, tvTitle;
     private LinearLayout li_content;
@@ -98,8 +98,13 @@ public class SavedFragment extends Fragment {
     private void initView() {
         appBarLayout = rootView.findViewById(R.id.app_bar);
         toolbar = rootView.findViewById(R.id.toolbar);
+        li_toolbar = rootView.findViewById(R.id.li_toolbar);
+        li_mainbar = rootView.findViewById(R.id.li_mainbar);
         toolbarShuffle = rootView.findViewById(R.id.toolbar_shuffle);
         mainShuffle = rootView.findViewById(R.id.main_shuffle);
+        toolbarRemove = rootView.findViewById(R.id.toolbar_remove);
+        mainRemove = rootView.findViewById(R.id.main_remove);
+
         toolbarShuffle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -118,6 +123,18 @@ public class SavedFragment extends Fragment {
                     ((MainActivity)getContext()).initPlayer(0);
                     ((MainActivity)getContext()).current_playing_type = "detail";
                 }
+            }
+        });
+        toolbarRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onRemove();
+            }
+        });
+        mainRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onRemove();
             }
         });
         backBtn = rootView.findViewById(R.id.back_btn);
@@ -150,15 +167,15 @@ public class SavedFragment extends Fragment {
                     if (state != CollapsingToolbarLayoutState.EXPANDED) {
                         state = CollapsingToolbarLayoutState.EXPANDED;//Modify the status token to expand
                         tvTitle.setVisibility(View.GONE);
-                        toolbarShuffle.setVisibility(View.INVISIBLE);
+                        li_toolbar.setVisibility(View.INVISIBLE);
                         li_content.setVisibility(View.VISIBLE);
                         li_search.setVisibility(View.VISIBLE);
-                        mainShuffle.setVisibility(View.VISIBLE);
+                        li_mainbar.setVisibility(View.VISIBLE);
                     }
                 } else if (Math.abs(verticalOffset) >= appBarLayout.getTotalScrollRange()) {
                     if (state != CollapsingToolbarLayoutState.COLLAPSED) {
-                        mainShuffle.setVisibility(View.GONE);//Hide Play Button
-                        toolbarShuffle.setVisibility(View.VISIBLE);
+                        li_mainbar.setVisibility(View.GONE);//Hide Play Button
+                        li_toolbar.setVisibility(View.VISIBLE);
                         state = CollapsingToolbarLayoutState.COLLAPSED;//Modified status marked as folded
                         tvTitle.setVisibility(View.VISIBLE);
                         li_content.setVisibility(View.GONE);
@@ -167,7 +184,7 @@ public class SavedFragment extends Fragment {
                 } else {
                     if (state != CollapsingToolbarLayoutState.INTERNEDIATE) {
                         if(state == CollapsingToolbarLayoutState.COLLAPSED){
-                            mainShuffle.setVisibility(View.GONE);//Hide Play Button When Changed from Folding to Intermediate State
+                            li_mainbar.setVisibility(View.GONE);//Hide Play Button When Changed from Folding to Intermediate State
                         }
                         state = CollapsingToolbarLayoutState.INTERNEDIATE;//Modify the status tag to the middle
                     }
@@ -266,13 +283,13 @@ public class SavedFragment extends Fragment {
                                         setTextTitle();
                                         saveData();
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                                 CommonUtils.hideLoadingDialog();
                             }
                         }
@@ -321,7 +338,112 @@ public class SavedFragment extends Fragment {
         String down_home_data = tmp_gson.toJson(trackList);
         JsonArray down_homejsonArray = new JsonParser().parse(down_home_data).getAsJsonArray();
         String tmp_down_home_str = down_homejsonArray.toString();
-        App.saveSharedSetting("saved_data", tmp_down_home_str);
+        App.saveSharedSetting(PRE_SAVEDATA, tmp_down_home_str);
+    }
+    private void onRemove(){
+        if(trackList.size() != 0){
+            ArrayList<String> id_lists = new ArrayList<>();
+            id_lists.clear();
+            for(int i = 0; i < trackList.size(); i++){
+                id_lists.add(trackList.get(i).getTrack_id());
+            }
+            String id_str = id_lists.toString();
+            id_str = id_str.substring(1, id_str.length() - 1).replace(", ", ",");
+
+            String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
+            String user_id = App.readSharedSetting(PRE_USER_ID, "");
+            View dialogView = getLayoutInflater().inflate(R.layout.dlg_exit, null);
+
+            final android.app.AlertDialog dlg = new android.app.AlertDialog.Builder(getActivity())
+                    .setView(dialogView)
+                    .setCancelable(true)
+                    .create();
+
+            dlg.setCanceledOnTouchOutside(true);
+            final TextView ok = dialogView.findViewById(R.id.ok);
+            final TextView cancel = dialogView.findViewById(R.id.cancel);
+            final TextView confirm_txt = dialogView.findViewById(R.id.confirm_txt);
+            confirm_txt.setText(R.string.remove_favorite_msg);
+            String finalId_str = id_str;
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (App.isNetworkAvailable(getActivity())) {
+                        try {
+                            Ion.with(getActivity())
+                                    .load(GlobalConstants.DELETE_ALL_SONG + member_key)
+                                    .setTimeout(CommonUtils.NETWORK_TIME)
+                                    .setBodyParameter("user_id", user_id)
+                                    .setBodyParameter("ids", finalId_str)
+                                    .setBodyParameter("type", type)
+                                    .asString()
+                                    .setCallback(new FutureCallback<String>() {
+                                        @Override
+                                        public void onCompleted(Exception e, String result) {
+                                            if (e == null) {
+                                                try {
+                                                    JSONObject resultObj = new JSONObject(result);
+                                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                                        if(type.equalsIgnoreCase("download")){
+                                                            String img_folder = getActivity().getFilesDir().getAbsolutePath() + File.separator + "image" + File.separator;
+                                                            File img_file = new File(img_folder);
+                                                            if(img_file.isDirectory()) {
+                                                                String[] children = img_file.list();
+                                                                for (int i = 0; i < children.length; i++)
+                                                                {
+                                                                    new File(img_file, children[i]).delete();
+                                                                }
+                                                            }
+                                                            String mp3_folder = getActivity().getFilesDir().getAbsolutePath() + File.separator + "video" + File.separator;
+                                                            File mp3_file = new File(mp3_folder);
+                                                            if(mp3_file.isDirectory()) {
+                                                                String[] children = mp3_file.list();
+                                                                for (int i = 0; i < children.length; i++)
+                                                                {
+                                                                    new File(mp3_file, children[i]).delete();
+                                                                }
+                                                            }
+                                                        }
+                                                        if(type.equalsIgnoreCase("download")){
+                                                            App.saveSharedSetting(PRE_SAVEDATA, "");
+                                                            App.saveSharedSetting(PRE_SONGCNT, "0");
+                                                            App.saveSharedSetting(PRE_IMAGEPATH, "");
+                                                        }else{
+                                                            App.saveSharedSetting(PRE_FAVDATA, "");
+                                                        }
+                                                        popFragment();
+                                                    } else {
+                                                        showErrorMessages(resultObj.getString("err_msg"));
+                                                    }
+                                                } catch (JSONException ex) {
+                                                    ex.printStackTrace();
+                                                }
+                                            } else {
+                                                showErrorMessages(R.string.txt_server_error);
+                                            }
+                                        }
+                                    });
+                        }catch (Exception net){
+                            net.printStackTrace();
+                        }
+
+                    } else {
+                        showErrorMessages(R.string.txt_network_error);
+                    }
+                    dlg.dismiss();
+                }
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dlg.dismiss();
+                }
+            });
+
+            dlg.setCanceledOnTouchOutside(false);
+            dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dlg.show();
+        }
     }
     public void removeDownload(int pos, String type){
         try {
@@ -349,48 +471,53 @@ public class SavedFragment extends Fragment {
                                                 img_file.delete();
                                             }
                                             String mp3_folder = getActivity().getFilesDir().getAbsolutePath() + File.separator + "video";
-                                            File mp3_file = new File(mp3_folder, trackList.get(pos).getTrack_id() + ".mp3");
+                                            File mp3_file = new File(mp3_folder, trackList.get(pos).getTrack_id() + ".m4a");
                                             if(mp3_file.exists()) {
                                                 mp3_file.delete();
                                             }
                                             updateList(pos);
 
                                         } else {
-                                            ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                            showErrorMessages(resultObj.getString("err_msg"));
                                         }
                                     } catch (JSONException ex) {
                                         ex.printStackTrace();
                                     }
                                 } else {
-                                    ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                    showErrorMessages(R.string.txt_server_error);
                                 }
                             }
                         });
             } else {
-                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                showErrorMessages(R.string.txt_network_error);
             }
         } catch (Exception e) {
-            ((MainActivity)getActivity()).showErrorMessages(e.getMessage());
+            showErrorMessages(e.getMessage());
         }
 
 
     }
     public void updateList(int pos){
-        trackList.remove(pos);
-        if(homeAdapter.getPosition("common") != -1){
-            if(pos < homeAdapter.getPosition("common")){
-                homeAdapter.setPosition(homeAdapter.getPosition("common") - 1, "common");
-            }else{
-                homeAdapter.setPosition(-1, "common");
+        try {
+
+            trackList.remove(pos);
+            if(homeAdapter.getPosition("common") != -1){
+                if(pos < homeAdapter.getPosition("common")){
+                    homeAdapter.setPosition(homeAdapter.getPosition("common") - 1, "common");
+                }else{
+                    homeAdapter.setPosition(-1, "common");
+                }
             }
-        }
-        homeAdapter.notifyDataSetChanged();
+            homeAdapter.notifyDataSetChanged();
 //                                            Constant.arrayList_play.clear();
 //                                            Constant.arrayList_play.addAll(trackList);
-        saveData();
-        saved_song_cnt = trackList.size();
-        setTextTitle();
-        ((MainActivity)getActivity()).setTrackList(trackList);
+            saveData();
+            saved_song_cnt = trackList.size();
+            setTextTitle();
+            ((MainActivity)getActivity()).setTrackList(trackList);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
     public void renameSong(int pos){
         try {
@@ -440,19 +567,19 @@ public class SavedFragment extends Fragment {
                                                         homeAdapter.notifyDataSetChanged();
                                                         ((MainActivity)getActivity()).showMessages("Song name changed");
                                                     } else {
-                                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                                        showErrorMessages(resultObj.getString("err_msg"));
                                                     }
                                                 } catch (JSONException ex) {
                                                     ex.printStackTrace();
                                                 }
                                             } else {
-                                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                                showErrorMessages(R.string.txt_server_error);
                                             }
                                             dlg.dismiss();
                                         }
                                     });
                         } else {
-                            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                            showErrorMessages(R.string.txt_network_error);
                         }
                     }else{
                         ((MainActivity)getContext()).showErrorMessages("Please confirm fields");
@@ -488,18 +615,5 @@ public class SavedFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private boolean popFragment() {
-        try {
 
-            boolean isPop = false;
-            if (getActivity().getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                isPop = true;
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
-            return isPop;
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
 }

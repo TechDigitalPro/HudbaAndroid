@@ -1,9 +1,7 @@
 package com.uru.hudba.fragment;
 
-import android.app.FragmentManager;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,19 +19,15 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.MyPlayListAdapter;
-import com.uru.hudba.adapter.UserTrackAdapter;
 import com.uru.hudba.constant.CommonUtils;
 import com.uru.hudba.constant.Constant;
 import com.uru.hudba.constant.GlobalConstants;
-import com.uru.hudba.model.DownloadModel;
 import com.uru.hudba.model.MyPlayListModel;
-import com.uru.hudba.model.PlayListModel;
 import com.uru.hudba.model.TrackModel;
-import com.uru.hudba.model.UserTrackModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -328,7 +322,6 @@ public class DetailBottomFragment extends SuperBottomSheetFragment implements Vi
                 dismiss();
                 break;
             case R.id.li_favorite:
-                Log.e("track_id", trackModel.getId() +":"+trackModel.getTrack_id());
                 ((MainActivity)getActivity()).add_favorite(trackModel, type, list_pos);
                 dismiss();
                 break;

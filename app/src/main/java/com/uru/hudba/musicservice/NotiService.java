@@ -12,18 +12,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.PowerManager;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -31,7 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
 
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.constant.Constant;
@@ -137,7 +134,7 @@ public class NotiService extends IntentService {
         return START_STICKY;
     }
     private void startNewSong() {
-        if(mediaPlayer != null && mediaPlayer.isPlaying()){
+        if(mediaPlayer != null){
             mediaPlayer.pause();
             Constant.isPlayed = false;
         }
@@ -147,12 +144,19 @@ public class NotiService extends IntentService {
             if(!TextUtils.isEmpty(Constant.arrayList_play.get(Constant.playPos).getFavorite()) && Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
                 String path = getFilesDir().getAbsolutePath() + File.separator + "video"  + File.separator;
                 url = Constant.arrayList_play.get(Constant.playPos).getTrack_id();
-                url = path + url + ".mp3";
+
+                String video_folder = getFilesDir().getAbsolutePath() + File.separator + "video";
+                File mp3_file = new File(video_folder, Constant.arrayList_play.get(Constant.playPos).getTrack_id() + ".mp3");
+                if(mp3_file.exists()) {
+                    url = path + url + ".mp3";
+                }
+                File m4a_file = new File(video_folder, Constant.arrayList_play.get(Constant.playPos).getTrack_id() + ".m4a");
+                if(m4a_file.exists()) {
+                    url = path + url + ".m4a";
+                }
 
                 if (mediaPlayer != null) {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.stop();
-                    }
+                    mediaPlayer.stop();
                 }
                 mediaPlayer = new MediaPlayer();
                 try {
@@ -209,13 +213,20 @@ public class NotiService extends IntentService {
     }
     private void togglePlay(){
         if(!TextUtils.isEmpty(Constant.arrayList_play.get(Constant.playPos).getFavorite()) && Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
-            if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                mediaPlayer.pause();
-                Constant.isPlayed = false;
-            }else if(mediaPlayer !=null && !mediaPlayer.isPlaying()){
-                mediaPlayer.start();
-                Constant.isPlayed = true;
+            try {
+                if(mediaPlayer != null){
+                    if(mediaPlayer.isPlaying()){
+                        mediaPlayer.pause();
+                                    Constant.isPlayed = false;
+                    }else{
+                        mediaPlayer.start();
+                                  Constant.isPlayed = true;
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
             updateNotiPlay(false);
             Constant.isPlayed = !Constant.isPlayed;
         }else{
@@ -497,13 +508,21 @@ public class NotiService extends IntentService {
     }
     @Override
     public void onDestroy() {
-        unregisterReceiver(mActivityReceiver);
-        if(mediaPlayer != null){
-            if(mediaPlayer.isPlaying()){
-                mediaPlayer.pause();
+        try {
+            unregisterReceiver(mActivityReceiver);
+            try {
+                if(mediaPlayer != null){
+                    mediaPlayer.pause();
+                    mediaPlayer.release();
+                }
+            }catch (Exception e1){
+                e1.printStackTrace();
             }
-            mediaPlayer.release();
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
         super.onDestroy();
     }
 
@@ -512,26 +531,31 @@ public class NotiService extends IntentService {
         @Override
         public void onReceive(Context context, Intent intent) {
             //         Log.e("service", "Got broadcast");
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
+            try {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
 
-            boolean noti_play = intent.getBooleanExtra("noti_play", false);
-            if(noti_play){
-                try {
-                    if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
-                        if(Constant.isPlayed){
-                            mediaPlayer.start();
-                        }else{
-                            mediaPlayer.pause();
+                boolean noti_play = intent.getBooleanExtra("noti_play", false);
+                if(noti_play){
+                    try {
+                        if(Constant.arrayList_play.get(Constant.playPos).getFavorite().contains("download")){
+                            if(Constant.isPlayed){
+                                mediaPlayer.start();
+                            }else{
+                                mediaPlayer.pause();
+                            }
+
                         }
-
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
 
-                updateNotiPlay(false);
+                    updateNotiPlay(false);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
         }
     };
 }

@@ -3,10 +3,7 @@ package com.uru.hudba.fragment;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -16,21 +13,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,17 +30,14 @@ import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.PlayListAdapter;
-import com.uru.hudba.adapter.TrackAdapter;
 import com.uru.hudba.base.BaseFragment;
 import com.uru.hudba.constant.CommonUtils;
 import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.PlayListModel;
-import com.uru.hudba.model.PlayListModel;
-import com.uru.hudba.model.TrackModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,7 +49,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.uru.hudba.constant.GlobalConstants.PRE_IMAGEPATH;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
+import static com.uru.hudba.constant.GlobalConstants.PRE_SONGCNT;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
 public class LibraryFragment extends BaseFragment implements View.OnClickListener{
@@ -158,8 +147,6 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
                 return false;
             }
         });
-
-
         getData();
         return rootView;
     }
@@ -169,61 +156,65 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
         String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
         String user_id = App.readSharedSetting(PRE_USER_ID, "");
         if (App.isNetworkAvailable(getContext())) {
-            li_list.setVisibility(View.VISIBLE);
-            li_playlist.setVisibility(View.VISIBLE);
-            Ion.with(getContext())
-                    .load(GlobalConstants.MYPLAY_LIST + member_key)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("user_id", user_id)
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            if (e == null) {
-                                try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        JSONObject api_result = resultObj.getJSONObject("api_result");
-                                        try {
-                                            tmp_image_path = api_result.getString("image_path");
-                                            saved_song_cnt = api_result.getInt("count");
-                                            txt_song_cnt.setText(saved_song_cnt + " songs");
-                                            App.saveSharedSetting("song_cnt", String.valueOf(saved_song_cnt));
-                                            App.saveSharedSetting("image_path", tmp_image_path);
-                                            if (!TextUtils.isEmpty(tmp_image_path)) {
-                                                Glide.with(getContext())
-                                                        .load(tmp_image_path)
-                                                        .override(180, 180).placeholder(R.drawable.aaa)
-                                                        .into(saved_song_image);
+            try {
+                li_list.setVisibility(View.VISIBLE);
+                li_playlist.setVisibility(View.VISIBLE);
+                Ion.with(getContext())
+                        .load(GlobalConstants.MYPLAY_LIST + member_key)
+                        .setTimeout(CommonUtils.NETWORK_TIME)
+                        .setBodyParameter("user_id", user_id)
+                        .asString()
+                        .setCallback(new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                if (e == null) {
+                                    try {
+                                        JSONObject resultObj = new JSONObject(result);
+                                        if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                            JSONObject api_result = resultObj.getJSONObject("api_result");
+                                            try {
+                                                tmp_image_path = api_result.getString("image_path");
+                                                saved_song_cnt = api_result.getInt("count");
+                                                txt_song_cnt.setText(saved_song_cnt + " songs");
+                                                App.saveSharedSetting(PRE_SONGCNT, String.valueOf(saved_song_cnt));
+                                                App.saveSharedSetting(PRE_IMAGEPATH, tmp_image_path);
+                                                if (!TextUtils.isEmpty(tmp_image_path)) {
+                                                    Glide.with(getContext())
+                                                            .load(tmp_image_path)
+                                                            .override(180, 180).placeholder(R.drawable.aaa)
+                                                            .into(saved_song_image);
+                                                }
+                                            }catch (Exception e1){
+                                                e1.printStackTrace();
                                             }
-                                        }catch (Exception e1){
-                                            e1.printStackTrace();
-                                        }
 
-                                        JSONArray articleArray = api_result.getJSONArray("list");
-                                        Gson gson = new Gson();
-
-                                        if (articleArray.length() == 0){
+                                            JSONArray articleArray = api_result.getJSONArray("list");
+                                            Gson gson = new Gson();
                                             playList.clear();
-                                        }else {
-                                            playList.clear();
-                                            for (int i = 0; i < articleArray.length(); i++) {
-                                                PlayListModel topModel = gson.fromJson(articleArray.getJSONObject(i).toString(), PlayListModel.class);
-                                                playList.add(topModel);
+                                            if (articleArray.length() != 0){
+                                                playList.clear();
+                                                for (int i = 0; i < articleArray.length(); i++) {
+                                                    PlayListModel topModel = gson.fromJson(articleArray.getJSONObject(i).toString(), PlayListModel.class);
+                                                    playList.add(topModel);
+                                                }
+                                                createRV(playList);
                                             }
-                                            createRV(playList);
+
+                                        } else {
+                                            showErrorMessages(resultObj.getString("err_msg"));
                                         }
-                                    } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
                                     }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
+                                } else {
+                                    showErrorMessages(R.string.txt_server_error);
                                 }
-                            } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
                             }
-                        }
-                    });
+                        });
+            }catch (Exception net){
+                net.printStackTrace();
+            }
+
         } else {
             playList.clear();
             li_list.setVisibility(View.GONE);
@@ -309,25 +300,25 @@ public class LibraryFragment extends BaseFragment implements View.OnClickListene
                                             try {
                                                 JSONObject resultObj = new JSONObject(result);
                                                 if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                                    ((MainActivity)getActivity()).showMessages("Playlist added successfully");
+                                                    showMessages("Playlist added successfully");
                                                     getData();
                                                 } else {
-                                                    ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                                    showErrorMessages(resultObj.getString("err_msg"));
                                                 }
                                             } catch (JSONException ex) {
                                                 ex.printStackTrace();
                                             }
                                         } else {
-                                            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                            showErrorMessages(R.string.txt_server_error);
                                         }
                                         dlg.dismiss();
                                     }
                                 });
                     } else {
-                        ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                        showErrorMessages(R.string.txt_network_error);
                     }
                 }else{
-                    ((MainActivity)getContext()).showErrorMessages("Please confirm fields");
+                    showErrorMessages("Please confirm fields");
                 }
             }
         });

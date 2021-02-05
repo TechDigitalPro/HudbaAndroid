@@ -1,4 +1,4 @@
-package com.uru.hudba;
+package com.uru.hudba.application;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,13 +10,11 @@ import androidx.multidex.MultiDexApplication;
 
 public class App extends MultiDexApplication {
     public static Context context;
-
     @Override
     public void onCreate() {
         super.onCreate();
         MultiDex.install(this);
         context = getApplicationContext();
-
     }
     public static String readSharedSetting(String settingName, String defaultValue) {
         SharedPreferences sharedPref = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);

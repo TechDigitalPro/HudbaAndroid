@@ -2,32 +2,19 @@ package com.uru.hudba.fragment;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.andrefrsousa.superbottomsheet.SuperBottomSheetFragment;
 import com.bumptech.glide.Glide;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
-import com.uru.hudba.constant.CommonUtils;
 import com.uru.hudba.constant.Constant;
-import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.TrackModel;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
 public class SavedBottomFragment extends SuperBottomSheetFragment implements View.OnClickListener {
     public SavedBottomFragment(TrackModel trackModel, String type, int list_pos){

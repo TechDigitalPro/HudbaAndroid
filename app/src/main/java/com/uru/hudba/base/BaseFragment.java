@@ -1,5 +1,6 @@
 package com.uru.hudba.base;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -19,6 +21,7 @@ import androidx.transition.Fade;
 import androidx.transition.TransitionInflater;
 import androidx.transition.TransitionSet;
 
+import com.farshidabz.poizitoast.PoiziToast;
 import com.uru.hudba.R;
 import com.uru.hudba.constant.BundleExtra;
 
@@ -79,6 +82,42 @@ public class BaseFragment extends Fragment {
 
     public void onSelectionItemClicked(int positon){
 
+    }
+    @SuppressLint("ResourceType")
+    public void showMessages(int resID){
+        PoiziToast.with(getActivity())
+                .setBackgroundColor(getResources().getColor(R.color.green_dark))
+                .setTextColor(getResources().getColor(R.color.white_color))
+                .setTextSize(14)
+                .makeToast(getResources().getString(resID), Toast.LENGTH_SHORT)
+                .show();
+    }
+    @SuppressLint("ResourceType")
+    public void showMessages(String str){
+        PoiziToast.with(getActivity())
+                .setBackgroundColor(getResources().getColor(R.color.green_dark))
+                .setTextColor(getResources().getColor(R.color.white_color))
+                .setTextSize(14)
+                .makeToast(str, Toast.LENGTH_SHORT)
+                .show();
+    }
+    @SuppressLint("ResourceType")
+    public void showErrorMessages(int resID){
+        PoiziToast.with(getActivity())
+                .setBackgroundColor(getResources().getColor(R.color.red_light))
+                .setTextColor(getResources().getColor(R.color.white_color))
+                .setTextSize(14)
+                .makeToast(getResources().getString(resID), Toast.LENGTH_SHORT)
+                .show();
+    }
+    @SuppressLint("ResourceType")
+    public void showErrorMessages(String str){
+        PoiziToast.with(getActivity())
+                .setBackgroundColor(getResources().getColor(R.color.red_light))
+                .setTextColor(getResources().getColor(R.color.white_color))
+                .setTextSize(14)
+                .makeToast(str, Toast.LENGTH_SHORT)
+                .show();
     }
     public BaseActivity getCurrentAct() {
         try {

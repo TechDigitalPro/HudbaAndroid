@@ -11,10 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import androidx.appcompat.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.AlbumAdapter;
@@ -219,19 +217,19 @@ public class SelectAllFragment extends BaseFragment {
                                         }
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                             }
                         }
                     });
         } else {
             CommonUtils.hideLoadingDialog();
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void getSearchData(){
@@ -277,19 +275,19 @@ public class SelectAllFragment extends BaseFragment {
                                         }
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                             }
                         }
                     });
         } else {
             CommonUtils.hideLoadingDialog();
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void getSearchMainData(){
@@ -337,19 +335,19 @@ public class SelectAllFragment extends BaseFragment {
                                         }
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                             }
                         }
                     });
         } else {
             CommonUtils.hideLoadingDialog();
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void createRV(ArrayList<AlbumModel> songModels){

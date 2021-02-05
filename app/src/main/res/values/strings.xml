@@ -2,7 +2,9 @@
     <string name="app_name">Hudba</string>
     <string name="facebook_app_id">1775668682601171</string>
     <string name="fb_login_protocol_scheme" translatable="false">fb1775668682601171</string>
-
+    <string name="admob_interstitial" translatable="false">ca-app-pub-9109531599846300/7171287122</string>
+    <string name="admob_appopen" translatable="false">ca-app-pub-9109531599846300/1667663099</string>
+<!--    <string name="admob_appopen" translatable="false">ca-app-pub-3940256099942544/3419835294</string>-->
     <string name="txt_login">Log in</string>
     <string name="txt_home">Home</string>
     <string name="txt_top_playlist">Top playlists</string>
@@ -37,8 +39,8 @@
     <string name="msg_input_password">Please input password</string>
     <string name="msg_input_confirmpassword">Please input repassword</string>
     <string name="msg_valid_confirmpassword">Please confirm password</string>
-    <string name="txt_server_error">Server error</string>
-    <string name="txt_network_error">Network error</string>
+    <string name="txt_server_error">Please confirm your Network Connection</string>
+    <string name="txt_network_error">Please confirm your Network Connection</string>
     <string name="msg_logout">Are you sure you want to Logout?</string>
     <string name="song_count">- %1$d Songs</string>
     <string name="search">Search</string>
@@ -138,6 +140,20 @@
     <string name="intro4_bottom">One account, all your library synced and saved on unlimited devices.</string>
     <string name="msg_file_no1">File Source Get fail, Please fix this song after connect network</string>
     <string name="msg_file_no2">File Source Get fail</string>
+    <string name="camera_permission">Camera permission is needed to take a photo.</string>
+    <string name="camera_write_permission">Camera &amp; Write permissions are needed to take a photo.</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="rate_us_msg">We hope you enjoyed with us today.\nIf you do not like it rate it. It will help us grow.</string>
+    <string name="continue_str">continue</string>
+    <string name="thanks_feedback">Thanks for the feedback</string>
+    <string name="download_source_fail">It is not possible to download this song at this time, try later</string>
+    <string name="remove_favorite_msg">It will be removed from your saved songs and from all your playlists. Are you sure?</string>
+    <string name="remove_all">Remove All</string>
+    <string name="confirm_pass">Confirm Password</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="new_password">New Password</string>
+    <string name="reset">Reset</string>
+    <string name="invalid_cur_pass">Please confirm current password</string>
 
 
 </resources>

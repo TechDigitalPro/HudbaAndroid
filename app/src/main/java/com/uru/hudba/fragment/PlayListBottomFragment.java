@@ -2,17 +2,14 @@ package com.uru.hudba.fragment;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,15 +19,13 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
-import com.uru.hudba.adapter.TrackAdapter;
 import com.uru.hudba.adapter.UserTrackAdapter;
 import com.uru.hudba.constant.CommonUtils;
 import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.PlayListModel;
-import com.uru.hudba.model.TrackModel;
 import com.uru.hudba.model.UserTrackModel;
 
 import org.json.JSONArray;

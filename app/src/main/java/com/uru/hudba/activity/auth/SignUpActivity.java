@@ -7,16 +7,13 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
-import com.uru.hudba.activity.SplashActivity;
-import com.uru.hudba.activity.intro.IntroActivity;
 import com.uru.hudba.base.BaseActivity;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.constant.CommonUtils;
@@ -26,7 +23,13 @@ import com.uru.hudba.model.UserModel;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.uru.hudba.constant.GlobalConstants.PRE_FAVDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_HOMEDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_IMAGEPATH;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
+import static com.uru.hudba.constant.GlobalConstants.PRE_RECENTLIST;
+import static com.uru.hudba.constant.GlobalConstants.PRE_SAVEDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_SONGCNT;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_EMAIL;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_FIRSTNAME;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
@@ -156,6 +159,15 @@ public class SignUpActivity extends BaseActivity implements View.OnClickListener
                                         App.saveSharedSetting(PRE_USER_NAME, userModel.getName());
                                         App.saveSharedSetting(PRE_USER_FIRSTNAME, userModel.getFirst_name());
                                         App.saveSharedSetting(PRE_USER_LASTNAME, userModel.getLast_name());
+
+                                        App.saveSharedSetting(PRE_HOMEDATA, "");
+                                        App.saveSharedSetting(PRE_RECENTLIST, "");
+                                        App.saveSharedSetting(PRE_SAVEDATA, "");
+                                        App.saveSharedSetting(PRE_FAVDATA, "");
+                                        App.saveSharedSetting(PRE_SONGCNT, "0");
+                                        App.saveSharedSetting(PRE_IMAGEPATH, "");
+
+
                                         gotoMainActivity();
                                     } else {
                                         showErrorMessages(resultObj.getString("err_msg"));

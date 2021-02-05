@@ -39,6 +39,7 @@ public class GlobalConstants {
     public static final String REMOVE_PLAYLIST = BaseUrl + "library/remove_playlist" + Client + ApiVersion +"&memberKey=";
     public static final String REMOVE_PLAYLIST_TRACK = BaseUrl + "library/remove_playlist_track" + Client + ApiVersion +"&memberKey=";
     public static final String DELETE_SAVED_SONG = BaseUrl + "library/delete_saved_song" + Client + ApiVersion +"&memberKey=";
+    public static final String DELETE_ALL_SONG = BaseUrl + "library/delete_all_song" + Client + ApiVersion +"&memberKey=";
     public static final String AVAILABLE_PLAYLIST_TRACKS = BaseUrl + "library/available_playlist_tracks" + Client + ApiVersion +"&memberKey=";
     public static final String MYPLAY_PLAYLIST_DETAIL = BaseUrl + "library/get_myplaylist" + Client + ApiVersion +"&memberKey=";
     public static final String ADD_TRACKS_PLAYLIST = BaseUrl + "library/add_playlist_tracks" + Client + ApiVersion +"&memberKey=";
@@ -72,6 +73,16 @@ public class GlobalConstants {
 
     public static final String PRE_PLAYING_MODE = "playing_mode";
     public static final String PRE_VOLUME_MODE = "volume_mode";
+
+    public static final String PRE_HOMEDATA = "home_data";
+    public static final String PRE_RECENTLIST = "recent_list";
+    public static final String PRE_SAVEDATA = "saved_data";
+    public static final String PRE_IMAGEPATH = "image_path";
+    public static final String PRE_SONGCNT = "song_cnt";
+    public static final String PRE_FAVDATA = "favorite_data";
+
+
+
 
 
 

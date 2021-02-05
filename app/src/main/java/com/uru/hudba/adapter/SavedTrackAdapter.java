@@ -130,7 +130,6 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
             }
             if(!TextUtils.isEmpty(item.getFavorite()) && item.getFavorite().contains("download")){
                 holder.rm_num.setTextColor(context.getResources().getColor(R.color.green_dark));
-                Log.e("play_color", "0");
             }else{
                 holder.rm_num.setTextColor(context.getResources().getColor(R.color.white_color));
             }
@@ -156,7 +155,6 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
                 if(getPosition("common") == position) {
                     if(checked){
                         holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
-                        Log.e("play_color", "1");
                     }else{
                         holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
                     }
@@ -169,7 +167,6 @@ public class SavedTrackAdapter extends RecyclerView.Adapter<SavedTrackAdapter.It
 
             if(Constant.cur_track_id.equalsIgnoreCase(item.getTrack_id())){
                 holder.rm_title.setTextColor(context.getResources().getColor(R.color.green_dark));
-                Log.e("play_color", "2");
             }
             if(Constant.downloading_list != null && Constant.downloading_list.size()>0){
                 for(int i = 0; i< Constant.downloading_list.size(); i++){

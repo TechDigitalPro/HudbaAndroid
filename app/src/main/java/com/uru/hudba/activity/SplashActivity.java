@@ -2,55 +2,124 @@ package com.uru.hudba.activity;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.appopen.AppOpenAd;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
-import com.uru.hudba.activity.auth.LoginActivity;
 import com.uru.hudba.activity.intro.IntroActivity;
-import com.uru.hudba.base.BaseActivity;
-import com.uru.hudba.constant.CommonUtils;
-import com.uru.hudba.constant.GlobalConstants;
-import com.uru.hudba.model.UserModel;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import static com.google.android.gms.ads.appopen.AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_EMAIL;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_FIRSTNAME;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_IMAGE;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_LASTNAME;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_NAME;
-import static com.uru.hudba.constant.GlobalConstants.PRE_USER_PASS;
 
-public class SplashActivity extends BaseActivity {
+public class SplashActivity extends Activity {
     private ImageView app_logo;
     private TextView app_title;
     private long showStartTime;
-    private final static long DELAY_TIME = 2000;
+    private final static long DELAY_TIME = 1000;
     private boolean isRunning;
+
+    private String AD_UNIT_ID;
+    private AppOpenAd appOpenAd = null;
+    private AppOpenAd.AppOpenAdLoadCallback loadCallback;
+    private FullScreenContentCallback fullScreenContentCallback;
+    private static boolean isShowingAd = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        app_logo = findViewById(R.id.logo);
-        app_title = findViewById(R.id.name);
-        startSplash();
-        startAnimation();
+        try {
+            setContentView(R.layout.activity_splash);
+            app_logo = findViewById(R.id.logo);
+            app_title = findViewById(R.id.name);
+            startSplash();
+            startAnimation();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
-    private void startAnimation() {
 
+    private void startAds() {
+        MobileAds.initialize(
+                this,
+                new OnInitializationCompleteListener() {
+                    @Override
+                    public void onInitializationComplete(InitializationStatus initializationStatus) {}
+                });
+        AD_UNIT_ID = getString(R.string.admob_appopen);
+        showAdIfAvailable();
+    }
+
+    private AdRequest getAdRequest() {
+        return new AdRequest.Builder().build();
+    }
+
+    public boolean isAdAvailable() {
+        return appOpenAd != null;
+    }
+
+    public void showAdIfAvailable() {
+        if (!isShowingAd && isAdAvailable()) {
+            fullScreenContentCallback = new FullScreenContentCallback() {
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            appOpenAd = null;
+                            isShowingAd = false;
+                            doFinish();
+                        }
+
+                        @Override
+                        public void onAdFailedToShowFullScreenContent(AdError adError) {}
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            isShowingAd = true;
+                        }
+                    };
+
+            appOpenAd.show(this, fullScreenContentCallback);
+
+        } else {
+            fetchAd();
+        }
+    }
+
+    public void fetchAd() {
+        if (isAdAvailable()) {
+            return;
+        }
+        loadCallback = new AppOpenAd.AppOpenAdLoadCallback() {
+                    @Override
+                    public void onAppOpenAdLoaded(AppOpenAd ad) {
+                        appOpenAd = ad;
+                        showAdIfAvailable();
+                    }
+
+                    @Override
+                    public void onAppOpenAdFailedToLoad(LoadAdError loadAdError) {
+                        doFinish();
+                    }
+                };
+        AdRequest request = getAdRequest();
+        AppOpenAd.load(this, AD_UNIT_ID, request, APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
+    }
+
+    private void startAnimation() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 app_logo.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -80,9 +149,8 @@ public class SplashActivity extends BaseActivity {
         }catch (Exception e){
             e.printStackTrace();
         }
-
-
     }
+
     private void startSplash(){
         showStartTime = System.currentTimeMillis();
         isRunning = true;
@@ -90,25 +158,25 @@ public class SplashActivity extends BaseActivity {
         Thread background = new Thread() {
             public void run(){
                 try{
-                    // Delay Time
                     long currentTime = System.currentTimeMillis();
                     if (currentTime - showStartTime < DELAY_TIME) {
                         try {
-                            // Delay for DELAY_TIME
-                            Thread.sleep(showStartTime + DELAY_TIME
-                                    - currentTime);
+                            Thread.sleep(showStartTime + DELAY_TIME - currentTime);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    return;
                 }catch (Exception e){
-                    return;
+                    e.printStackTrace();
                 }finally {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            doFinish();
+                            if (App.isNetworkAvailable(SplashActivity.this)){
+                                startAds();
+                            }else {
+                                doFinish();
+                            }
                         }
                     });
                 }
@@ -126,20 +194,29 @@ public class SplashActivity extends BaseActivity {
                     overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                     finish();
                 }else{
-                    Intent intent = new Intent(SplashActivity.this,MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-                    finish();
                 }
             }catch (Exception e){
                 e.printStackTrace();
             }
-
-
         }
     }
-    private void onSignin(){
+
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
+        if(this.isRunning)
+            this.isRunning = false;
+        finish();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+    /*private void onSignin(){
         String device_key = "";
         try{
             device_key = CommonUtils.getDeviceToken(getApplicationContext());
@@ -197,17 +274,5 @@ public class SplashActivity extends BaseActivity {
         } else {
             showErrorMessages(R.string.txt_network_error);
         }
-    }
-
-    @Override
-    public void onBackPressed(){
-        super.onBackPressed();
-        if(this.isRunning)
-            this.isRunning = false;
-        finish();
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
+    }*/
 }

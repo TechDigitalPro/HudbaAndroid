@@ -1,21 +1,26 @@
 package com.uru.hudba.activity.auth;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
-import com.uru.hudba.activity.SplashActivity;
-import com.uru.hudba.activity.intro.IntroActivity;
 import com.uru.hudba.base.BaseActivity;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.constant.CommonUtils;
@@ -68,6 +73,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
+                break;
+            case R.id.forgot_btn:
+                onForgot();
                 break;
             case R.id.login_btn:
                 validCheck();
@@ -151,5 +159,103 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         startActivity(intent);
 
         finish();
+    }
+
+    private void onForgot(){
+        View dialogView = getLayoutInflater().inflate(R.layout.dlg_forgot_pass, null);
+
+
+        AlertDialog emailDlg = new android.app.AlertDialog.Builder(LoginActivity.this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        final TextView ok = dialogView.findViewById(R.id.ok);
+        final TextView cancel = dialogView.findViewById(R.id.cancel);
+        final EditText new_pass = dialogView.findViewById(R.id.pass_et);
+        final EditText confirm_pass = dialogView.findViewById(R.id.confirm_pass_et);
+        final EditText email_et = dialogView.findViewById(R.id.email_et);
+        email_et.requestFocus();
+        final ToggleButton toggoleBtnf = dialogView.findViewById(R.id.toggoleBtn);
+        toggoleBtnf.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    new_pass.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                }
+                else{
+                    new_pass.setInputType(129);
+
+                }
+            }
+        });
+        final ToggleButton toggoleBtnf1 = dialogView.findViewById(R.id.toggoleBtn1);
+        toggoleBtnf1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    confirm_pass.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                }
+                else{
+                    confirm_pass.setInputType(129);
+
+                }
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                emailDlg.dismiss();
+            }
+        });
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(email_et.getText().toString().equals("") || new_pass.getText().toString().equals("") || confirm_pass.getText().toString().equals("")){
+                    showErrorMessages("Please confirm field");
+                }else if(!isValidEmail(email_et.getText().toString().trim())){
+                    showErrorMessages("Please confirm your mail");
+                }
+                else if(!new_pass.getText().toString().equalsIgnoreCase(confirm_pass.getText().toString())){
+                    showErrorMessages("Please confirm new password");
+                }else{
+                    emailDlg.dismiss();
+                    if (App.isNetworkAvailable(getApplicationContext())) {
+                        CommonUtils.showLoadingDialog(LoginActivity.this);
+                        Ion.with(getApplicationContext())
+                                .load(GlobalConstants.ForgotUrl)
+                                .setTimeout(CommonUtils.NETWORK_TIME)
+                                .setBodyParameter("email", email_et.getText().toString().trim())
+                                .setBodyParameter("new_password", new_pass.getText().toString().trim())
+                                .asString()
+                                .setCallback(new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        CommonUtils.hideLoadingDialog();
+                                        if (e == null) {
+                                            try {
+                                                JSONObject resultObj = new JSONObject(result);
+                                                if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                                    showMessages(resultObj.getString("api_result"));
+                                                } else {
+                                                    showErrorMessages(resultObj.getString("err_msg"));
+                                                }
+                                            } catch (JSONException ex) {
+                                                ex.printStackTrace();
+                                            }
+                                        } else {
+                                            showErrorMessages(R.string.txt_network_error);
+                                        }
+                                    }
+                                });
+                    } else {
+                        showErrorMessages(R.string.txt_network_error);
+                    }
+                }
+
+            }
+        });
+        emailDlg.setCanceledOnTouchOutside(true);
+        emailDlg.setCancelable(true);
+        emailDlg.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        emailDlg.show();
     }
 }

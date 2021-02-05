@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +18,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.mancj.slideup.SlideUp;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.activity.SplashActivity;
@@ -181,7 +179,11 @@ public class SettingFragment extends BaseFragment implements View.OnClickListene
     private void logout(){
         String member_key = App.readSharedSetting(PRE_MEMBER_KEY,"");
         if (App.isNetworkAvailable(getActivity())) {
-            ((MainActivity)getActivity()).showProgressDialog(getActivity());
+            try {
+                CommonUtils.showLoadingDialog(getActivity());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             Ion.with(getActivity())
                     .load(GlobalConstants.LogoutUrl + "&memberKey=" + member_key)
                     .setTimeout(CommonUtils.NETWORK_TIME)
@@ -189,8 +191,7 @@ public class SettingFragment extends BaseFragment implements View.OnClickListene
                     .setCallback(new FutureCallback<String>() {
                         @Override
                         public void onCompleted(Exception e, String result) {
-//                            CommonUtils.hideLoadingDialog();
-                            ((MainActivity)getActivity()).hideProgressDialog();
+                            CommonUtils.hideLoadingDialog();
                             if (e == null) {
                                 try {
                                     JSONObject resultObj = new JSONObject(result);
@@ -202,7 +203,7 @@ public class SettingFragment extends BaseFragment implements View.OnClickListene
                                         App.saveSharedSetting(PRE_USER_LASTNAME, "");
                                         App.saveSharedSetting(PRE_USER_IMAGE, "");
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                     Intent intent = new Intent(getActivity(), NotiService.class);
                                     intent.setAction(NotiService.ACTION_STOP);
@@ -215,16 +216,19 @@ public class SettingFragment extends BaseFragment implements View.OnClickListene
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                                showErrorMessages(R.string.txt_network_error);
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
 
 
+    private void onReview(){
+        CommonUtils.showReviewDlg(getActivity());
+    }
     @Override
     public void onClick(View view) {
         switch (view.getId()){
@@ -254,13 +258,7 @@ public class SettingFragment extends BaseFragment implements View.OnClickListene
                 ((MainActivity)getActivity()).setLibrary();
                 break;
             case R.id.li_review:
-                final String appPackageName = getActivity().getPackageName(); // getPackageName() from Context or Activity object
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                }
-                catch (android.content.ActivityNotFoundException anfe) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                }
+                onReview();
                 break;
             case R.id.li_information:
                 ((BaseActivity)getActivity()).animateVisibilityHidden(setting_mainview);

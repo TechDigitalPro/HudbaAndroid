@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -13,7 +14,9 @@
         android:layout_height="@dimen/splash_logo_size"
         android:src="@drawable/app_logo"
         android:layout_marginBottom="@dimen/margin_20"
-        app:tint="@color/white_color" />
+        android:tint="@color/white_color"
+        app:tint="@color/white_color"
+        tools:ignore="UseAppTint" />
     <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"

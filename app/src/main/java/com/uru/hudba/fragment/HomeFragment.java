@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,7 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.AlbumAdapter;
@@ -40,6 +39,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import static com.uru.hudba.constant.GlobalConstants.PRE_FAVDATA;
+import static com.uru.hudba.constant.GlobalConstants.PRE_HOMEDATA;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
@@ -63,7 +64,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
     private TrendingAdapter trendingAdapter, favoriteAdapter;
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ((MainActivity) getActivity()).current_page = "home";
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
         btn_profile = rootView.findViewById(R.id.btn_profile);
 
@@ -127,6 +127,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity) getActivity()).current_page = "home";
         getData();
     }
     private void getData(){
@@ -141,126 +142,131 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
         String user_id = App.readSharedSetting(PRE_USER_ID, "");
         Log.e("member_key:", member_key);
         if (App.isNetworkAvailable(getContext())) {
-            ((MainActivity)getActivity()).showProgressDialog(getActivity());
-            Ion.with(getContext())
-                    .load(GlobalConstants.HOME_LIST)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("memberKey", member_key)
-                    .setBodyParameter("user_id", user_id)
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            try {
-                                ((MainActivity)getActivity()).hideProgressDialog();
-                            }catch (Exception e1){
-                                e1.printStackTrace();
-                            }
-                            if (e == null) {
+            try {
+                CommonUtils.showLoadingDialog(getActivity());
+                Ion.getDefault(getContext()).getConscryptMiddleware().enable(false);
+                Ion.with(getContext())
+                        .load(GlobalConstants.HOME_LIST)
+                        .setTimeout(CommonUtils.NETWORK_TIME)
+                        .setBodyParameter("memberKey", member_key)
+                        .setBodyParameter("user_id", user_id)
+                        .asString()
+                        .setCallback(new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
                                 try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        JSONObject api_result = resultObj.getJSONObject("api_result");
-                                        Gson gson = new Gson();
-
-
-                                        JSONArray homeArray = api_result.getJSONArray("home_list");
-                                        if (homeArray.length() == 0){
-                                            home_list.clear();
-                                            rv_home.setVisibility(View.GONE);
-                                        }else {
-                                            rv_home.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < homeArray.length(); i++) {
-                                                TrackModel home = gson.fromJson(homeArray.getJSONObject(i).toString(), TrackModel.class);
-                                                home_list.add(home);
-                                            }
-                                            createHomeRV(home_list);
-                                        }
-                                        Gson tmp_gson = new Gson();
-                                        String down_home_data = tmp_gson.toJson(home_list);
-                                        JsonArray down_homejsonArray = new JsonParser().parse(down_home_data).getAsJsonArray();
-                                        String tmp_down_home_str = down_homejsonArray.toString();
-                                        App.saveSharedSetting("home_data", tmp_down_home_str);
-
-                                        JSONArray favoriteArray = api_result.getJSONArray("favorite_list");
-                                        if (favoriteArray.length() == 0){
-                                            favorite_list.clear();
-                                            li_favorite.setVisibility(View.GONE);
-                                        }else {
-                                            li_favorite.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < favoriteArray.length(); i++) {
-                                                TrackModel favorite = gson.fromJson(favoriteArray.getJSONObject(i).toString(), TrackModel.class);
-                                                favorite_list.add(favorite);
-                                            }
-                                            createFavoriteRV(favorite_list);
-                                        }
-
-
-                                        Gson tmp_fgson = new Gson();
-                                        String down_favorite_data = tmp_fgson.toJson(favorite_list);
-                                        JsonArray down_fjsonArray = new JsonParser().parse(down_favorite_data).getAsJsonArray();
-                                        String tmp_down_fav_str = down_fjsonArray.toString();
-                                        App.saveSharedSetting("favorite_data", tmp_down_fav_str);
-
-                                        JSONArray topArray = api_result.getJSONArray("top_list");
-
-                                        if (topArray.length() == 0){
-                                            top_list.clear();
-                                            li_top.setVisibility(View.GONE);
-                                        }else {
-                                            li_top.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < topArray.length(); i++) {
-                                                AlbumModel topModel = gson.fromJson(topArray.getJSONObject(i).toString(), AlbumModel.class);
-                                                top_list.add(topModel);
-                                            }
-                                            createTopRV(top_list);
-                                        }
-                                        JSONArray rankArray = api_result.getJSONArray("rank_list");
-                                        if (rankArray.length() == 0){
-                                            ranking_list.clear();
-                                            li_rank.setVisibility(View.GONE);
-                                        }else {
-                                            li_rank.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < rankArray.length(); i++) {
-                                                String list_id = rankArray.getJSONObject(i).getString("playlist_id");
-                                                String title = rankArray.getJSONObject(i).getString("country");
-                                                String cover_image = rankArray.getJSONObject(i).getString("image");
-                                                AlbumModel topModel = new AlbumModel();
-                                                topModel.setList_id(list_id);
-                                                topModel.setTitle(title);
-                                                topModel.setCover_image(cover_image);
-                                                ranking_list.add(topModel);
-                                            }
-                                            createRankRV(ranking_list);
-                                        }
-
-                                        JSONArray trendingArray = api_result.getJSONArray("trend_list");
-                                        if (trendingArray.length() == 0){
-                                            trending_list.clear();
-                                            li_trending.setVisibility(View.GONE);
-                                        }else {
-                                            li_trending.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < trendingArray.length(); i++) {
-                                                TrackModel trending = gson.fromJson(trendingArray.getJSONObject(i).toString(), TrackModel.class);
-                                                trending_list.add(trending);
-
-                                            }
-                                            createTrendingRV(trending_list);
-                                        }
-
-
-                                    } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
-                                    }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
-                                    ((MainActivity)getActivity()).showErrorMessages(ex.getMessage());
+                                    CommonUtils.hideLoadingDialog();
+                                }catch (Exception e1){
+                                    e1.printStackTrace();
                                 }
-                            } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                if (e == null) {
+                                    try {
+                                        JSONObject resultObj = new JSONObject(result);
+                                        if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                            JSONObject api_result = resultObj.getJSONObject("api_result");
+                                            Gson gson = new Gson();
+
+
+                                            JSONArray homeArray = api_result.getJSONArray("home_list");
+                                            if (homeArray.length() == 0){
+                                                home_list.clear();
+                                                rv_home.setVisibility(View.GONE);
+                                            }else {
+                                                rv_home.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < homeArray.length(); i++) {
+                                                    TrackModel home = gson.fromJson(homeArray.getJSONObject(i).toString(), TrackModel.class);
+                                                    home_list.add(home);
+                                                }
+                                                createHomeRV(home_list);
+                                            }
+                                            Gson tmp_gson = new Gson();
+                                            String down_home_data = tmp_gson.toJson(home_list);
+                                            JsonArray down_homejsonArray = new JsonParser().parse(down_home_data).getAsJsonArray();
+                                            String tmp_down_home_str = down_homejsonArray.toString();
+                                            App.saveSharedSetting(PRE_HOMEDATA, tmp_down_home_str);
+
+                                            JSONArray favoriteArray = api_result.getJSONArray("favorite_list");
+                                            if (favoriteArray.length() == 0){
+                                                favorite_list.clear();
+                                                li_favorite.setVisibility(View.GONE);
+                                            }else {
+                                                li_favorite.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < favoriteArray.length(); i++) {
+                                                    TrackModel favorite = gson.fromJson(favoriteArray.getJSONObject(i).toString(), TrackModel.class);
+                                                    favorite_list.add(favorite);
+                                                }
+                                                createFavoriteRV(favorite_list);
+                                            }
+
+
+                                            Gson tmp_fgson = new Gson();
+                                            String down_favorite_data = tmp_fgson.toJson(favorite_list);
+                                            JsonArray down_fjsonArray = new JsonParser().parse(down_favorite_data).getAsJsonArray();
+                                            String tmp_down_fav_str = down_fjsonArray.toString();
+                                            App.saveSharedSetting(PRE_FAVDATA, tmp_down_fav_str);
+                                            JSONArray topArray = api_result.getJSONArray("top_list");
+
+                                            if (topArray.length() == 0){
+                                                top_list.clear();
+                                                li_top.setVisibility(View.GONE);
+                                            }else {
+                                                li_top.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < topArray.length(); i++) {
+                                                    AlbumModel topModel = gson.fromJson(topArray.getJSONObject(i).toString(), AlbumModel.class);
+                                                    top_list.add(topModel);
+                                                }
+                                                createTopRV(top_list);
+                                            }
+                                            JSONArray rankArray = api_result.getJSONArray("rank_list");
+                                            if (rankArray.length() == 0){
+                                                ranking_list.clear();
+                                                li_rank.setVisibility(View.GONE);
+                                            }else {
+                                                li_rank.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < rankArray.length(); i++) {
+                                                    String list_id = rankArray.getJSONObject(i).getString("playlist_id");
+                                                    String title = rankArray.getJSONObject(i).getString("country");
+                                                    String cover_image = rankArray.getJSONObject(i).getString("image");
+                                                    AlbumModel topModel = new AlbumModel();
+                                                    topModel.setList_id(list_id);
+                                                    topModel.setTitle(title);
+                                                    topModel.setCover_image(cover_image);
+                                                    ranking_list.add(topModel);
+                                                }
+                                                createRankRV(ranking_list);
+                                            }
+
+                                            JSONArray trendingArray = api_result.getJSONArray("trend_list");
+                                            if (trendingArray.length() == 0){
+                                                trending_list.clear();
+                                                li_trending.setVisibility(View.GONE);
+                                            }else {
+                                                li_trending.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < trendingArray.length(); i++) {
+                                                    TrackModel trending = gson.fromJson(trendingArray.getJSONObject(i).toString(), TrackModel.class);
+                                                    trending_list.add(trending);
+
+                                                }
+                                                createTrendingRV(trending_list);
+                                            }
+
+
+                                        } else {
+                                            showErrorMessages(resultObj.getString("err_msg"));
+                                        }
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
+                                        showErrorMessages(ex.getMessage());
+                                    }
+                                } else {
+                                    showErrorMessages(R.string.txt_server_error);
+                                }
                             }
-                        }
-                    });
+                        });
+            }catch (Exception net){
+                net.printStackTrace();
+            }
+
         } else {
             home_list.clear();
             String home_str = App.readSharedSetting("home_data", "");
@@ -325,26 +331,31 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void createTopRV(ArrayList<AlbumModel> album_list){
-        topAdapter = new AlbumAdapter(getContext(), album_list,getFragmentManager(), "top", "common");
-        topAdapter.notifyDataSetChanged();
-        rv_top.setAdapter(topAdapter);
-        topAdapter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String id = top_list.get(rv_top.getChildAdapterPosition(view)).getList_id();
-                String title = top_list.get(rv_top.getChildAdapterPosition(view)).getTitle();
-                String image = top_list.get(rv_top.getChildAdapterPosition(view)).getCover_image();
+        try {
+            topAdapter = new AlbumAdapter(getContext(), album_list,getFragmentManager(), "top", "common");
+            topAdapter.notifyDataSetChanged();
+            rv_top.setAdapter(topAdapter);
+            topAdapter.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String id = top_list.get(rv_top.getChildAdapterPosition(view)).getList_id();
+                    String title = top_list.get(rv_top.getChildAdapterPosition(view)).getTitle();
+                    String image = top_list.get(rv_top.getChildAdapterPosition(view)).getCover_image();
 
-                Bundle bundle = new Bundle();
-                TrackDetailFragment frag = new TrackDetailFragment();
-                bundle.putString("id", id);
-                bundle.putString("title", title);
-                bundle.putString("type", "top");
-                bundle.putString("image", image);
-                frag.setArguments(bundle);
-                pushFragment(frag, true, TrackDetailFragment.class.getName());
-            }
-        });
+                    Bundle bundle = new Bundle();
+                    TrackDetailFragment frag = new TrackDetailFragment();
+                    bundle.putString("id", id);
+                    bundle.putString("title", title);
+                    bundle.putString("type", "top");
+                    bundle.putString("image", image);
+                    frag.setArguments(bundle);
+                    pushFragment(frag, true, TrackDetailFragment.class.getName());
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
     private void createDailyRV(ArrayList<AlbumModel> daily_list){
         dailyAdapter = new AlbumAdapter(getContext(), daily_list,getFragmentManager(), "daily", "common");

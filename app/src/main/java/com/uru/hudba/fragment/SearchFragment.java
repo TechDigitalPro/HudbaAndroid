@@ -2,37 +2,29 @@ package com.uru.hudba.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.AlbumAdapter;
@@ -51,7 +43,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.os.Looper.getMainLooper;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
@@ -212,18 +203,18 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                             createRV(searchList);
                                         }
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void createRV(ArrayList<SearchModel> songModels){
@@ -269,7 +260,6 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
 
         String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
         String user_id = App.readSharedSetting(PRE_USER_ID, "");
-        Log.e("member_key:", member_key);
         if (App.isNetworkAvailable(getContext())) {
             Ion.with(getContext())
                     .load(GlobalConstants.SEARCH)
@@ -354,20 +344,20 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
                                         }
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                             }
                             li_loading.setVisibility(View.GONE);
                         }
                     });
         } else {
             li_loading.setVisibility(View.GONE);
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void createTrackRV(ArrayList<TrackModel> songModels){
@@ -422,10 +412,14 @@ public class SearchFragment extends BaseFragment implements View.OnClickListener
     }
 
     public void updateAdapter(int pos, String value){
-        TrackModel tmp = track_list.get(pos);
-        tmp.setFavorite(value);
-        track_list.set(pos, tmp);
-        trackAdapter.notifyDataSetChanged();
+        try {
+            TrackModel tmp = track_list.get(pos);
+            tmp.setFavorite(value);
+            track_list.set(pos, tmp);
+            trackAdapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
     @Override
     public void onClick(View view) {

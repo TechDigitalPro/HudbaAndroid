@@ -30,7 +30,7 @@ public class DownloadVideoAsyn extends AsyncTask<String, Integer, String> {
     private NotificationCompat.Builder builder;
     private NotificationManager manager;
     private String CHANNEL_ID = "download_video_tiktok_auto";
-    private String pathVideo = title + ".mp3";
+    private String pathVideo = title + ".m4a";
     private int id = 1232;
     private Context mContext;
     private NotificationChannel mChannel;
@@ -67,7 +67,7 @@ public class DownloadVideoAsyn extends AsyncTask<String, Integer, String> {
 
 
             builder.setSmallIcon(R.drawable.ic_download)
-                    .setContentTitle(title.replace("&#39;", "") + ".mp3")
+                    .setContentTitle(title.replace("&#39;", "") + ".m4a")
                     .setContentText(mContext.getString(R.string.download))
                     .setChannelId(CHANNEL_ID)
                     .setPriority(Notification.PRIORITY_MAX)
@@ -96,7 +96,7 @@ public class DownloadVideoAsyn extends AsyncTask<String, Integer, String> {
             if (!folder.exists()) {
                 folder.mkdir();
             }
-            String path = PATH + title + ".mp3";
+            String path = PATH + title + ".m4a";
 
             File file = new File(path);
             long total = 0;
@@ -139,7 +139,7 @@ public class DownloadVideoAsyn extends AsyncTask<String, Integer, String> {
                 }
                 Date currentTime = Calendar.getInstance().getTime();
                 title = currentTime.getTime() + "";
-                String path = PATH + title + ".mp3";
+                String path = PATH + title + ".m4a";
                 File file = new File(path);
                 long total = 0;
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -174,7 +174,7 @@ public class DownloadVideoAsyn extends AsyncTask<String, Integer, String> {
                 return null;
             }
         }
-        return PATH + title + ".mp3";
+        return PATH + title + ".m4a";
     }
 
 

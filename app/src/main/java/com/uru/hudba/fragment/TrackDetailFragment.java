@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,10 +19,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,10 +29,11 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.TrackAdapter;
+import com.uru.hudba.base.BaseFragment;
 import com.uru.hudba.constant.CommonUtils;
 import com.uru.hudba.constant.GlobalConstants;
 import com.uru.hudba.model.TrackModel;
@@ -44,14 +41,13 @@ import com.uru.hudba.model.TrackModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 
-public class TrackDetailFragment extends Fragment {
+public class TrackDetailFragment extends BaseFragment {
     private View rootView;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
@@ -291,19 +287,19 @@ public class TrackDetailFragment extends Fragment {
                                         }
                                         txt_song_count.setText(String.format(getResources().getString(R.string.song_count), trackList.size()));
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                                 CommonUtils.hideLoadingDialog();
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void getSearchTrackAll(){
@@ -352,19 +348,19 @@ public class TrackDetailFragment extends Fragment {
                                         }
                                         txt_song_count.setText(String.format(getResources().getString(R.string.song_count), trackList.size()));
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                                 CommonUtils.hideLoadingDialog();
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void getSearchMainTrackAll(){
@@ -407,19 +403,19 @@ public class TrackDetailFragment extends Fragment {
                                         }
                                         txt_song_count.setText(String.format(getResources().getString(R.string.song_count), trackList.size()));
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
+                                showErrorMessages(R.string.txt_server_error);
                                 CommonUtils.hideLoadingDialog();
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void createRV(ArrayList<TrackModel> songModels){
@@ -428,23 +424,13 @@ public class TrackDetailFragment extends Fragment {
         rv_library.setAdapter(homeAdapter);
     }
     public void updateAdapter(int pos, String value){
-        TrackModel tmp = trackList.get(pos);
-        tmp.setFavorite(value);
-        trackList.set(pos, tmp);
-        homeAdapter.notifyDataSetChanged();
-    }
-    private boolean popFragment() {
         try {
-
-            boolean isPop = false;
-            if (getActivity().getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                isPop = true;
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
-            return isPop;
-
-        } catch (Exception e) {
-            return false;
+            TrackModel tmp = trackList.get(pos);
+            tmp.setFavorite(value);
+            trackList.set(pos, tmp);
+            homeAdapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

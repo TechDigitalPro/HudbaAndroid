@@ -62,7 +62,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
                         TrackModel tmp = reviewList.get(i);
                         tmp.setFavorite("");
                         reviewList.set(i, tmp);
-                        notifyItemRangeChanged(i, i+1);
+//                        notifyItemRangeChanged(i, i+1);
                         notifyDataSetChanged();
                     }
                 }
@@ -116,7 +116,11 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
     @Override
     public void onBindViewHolder(TrackAdapter.ItemHolder holder, int position) {
 
+
+
         TrackModel item = reviewList.get(position);
+        holder.rm_download_loading.setVisibility(View.GONE);
+        holder.rm_num.setVisibility(View.VISIBLE);
         if (!TextUtils.isEmpty(item.getTitle())) {
             holder.rm_title.setText(item.getTitle());
         }
@@ -166,11 +170,22 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ItemHolder> 
             holder.rm_title.setTextColor(context.getResources().getColor(R.color.white_color));
         }
         if(Constant.downloading_list != null && Constant.downloading_list.size()!=0){
-            Log.e("size:", Constant.downloading_list.size() + "");
+//            try {
+//                if(Constant.downloading_list.get(position).getPosition() == position){
+//                    holder.rm_download_loading.setVisibility(View.VISIBLE);
+//                    holder.rm_num.setVisibility(View.GONE);
+//                }
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+
             for(int i = 0; i< Constant.downloading_list.size(); i++){
                 if(Constant.downloading_list.get(i).getTrackModel().getTrack_id().equalsIgnoreCase(item.getTrack_id())){
-                    holder.rm_download_loading.setVisibility(View.VISIBLE);
-                    holder.rm_num.setVisibility(View.GONE);
+                    if(holder.rm_download_loading.getVisibility() != View.VISIBLE){
+                        holder.rm_download_loading.setVisibility(View.VISIBLE);
+                        holder.rm_num.setVisibility(View.GONE);
+                        Log.e("download_status", position + "");
+                    }
                 }
             }
         }else{

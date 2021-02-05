@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,7 +37,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.ligl.android.widget.iosdialog.IOSSheetDialog;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.base.BaseFragment;
@@ -65,9 +63,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import static android.app.Activity.RESULT_OK;
 import static com.uru.hudba.constant.GlobalConstants.PICK_FROM_CAMERA;
 import static com.uru.hudba.constant.GlobalConstants.PICK_FROM_FILE;
-import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_EMAIL;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_FIRSTNAME;
+import static com.uru.hudba.constant.GlobalConstants.PRE_USER_ID;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_IMAGE;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_LASTNAME;
 import static com.uru.hudba.constant.GlobalConstants.PRE_USER_NAME;
@@ -166,7 +164,7 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
                                 startActivityForResult(intent, PICK_FROM_CAMERA);
                             }
                         } else {
-                            Toast.makeText(getActivity(), "Camera & Write permissions are needed to take a photo.", Toast.LENGTH_SHORT).show();
+                            showErrorMessages(R.string.camera_write_permission);
                         }
                     }
                     @Override public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
@@ -186,7 +184,7 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
                         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_FROM_FILE);
                     }
                     @Override public void onPermissionDenied(PermissionDeniedResponse response) {
-                        Toast.makeText(getActivity(), "Camera permission is needed to take a photo.", Toast.LENGTH_SHORT).show();
+                        showErrorMessages(R.string.camera_permission);
                     }
                     @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
                         token.continuePermissionRequest();
@@ -284,28 +282,30 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
                                         popFragment();
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        showErrorMessages(resultObj.getString("err_msg"));
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
-                                    ((MainActivity)getActivity()).showErrorMessages(ex.getMessage());
+                                    showErrorMessages(ex.getMessage());
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                                showErrorMessages(R.string.txt_network_error);
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     private void changeProfile(){
         String member_key = App.readSharedSetting("member_key","");
+        String user_id = App.readSharedSetting(PRE_USER_ID,"");
         if (App.isNetworkAvailable(getActivity())) {
             CommonUtils.showLoadingDialog(getActivity());
             Ion.with(getActivity())
                     .load(GlobalConstants.UpdateProfileUrl + "&memberKey=" + member_key)
                     .setTimeout(CommonUtils.NETWORK_TIME)
+                    .setBodyParameter("user_id", user_id)
                     .setBodyParameter("password", et_pass.getText().toString().trim())
                     .setBodyParameter("first_name", et_first_name.getText().toString().trim())
                     .setBodyParameter("last_name", et_last_name.getText().toString().trim())
@@ -334,19 +334,23 @@ public class ProfileChangeFragment extends BaseFragment implements View.OnClickL
                                         popFragment();
 
                                     } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                        if(resultObj.getString("err_msg").equalsIgnoreCase("pass_valid")){
+                                            showErrorMessages(getResources().getString(R.string.invalid_cur_pass));
+                                        }else{
+                                            showErrorMessages(resultObj.getString("err_msg"));
+                                        }
                                     }
                                 } catch (JSONException ex) {
                                     ex.printStackTrace();
-                                    ((MainActivity)getActivity()).showErrorMessages(ex.getMessage());
+                                    showErrorMessages(ex.getMessage());
                                 }
                             } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+                                showErrorMessages(R.string.txt_network_error);
                             }
                         }
                     });
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
     }
     @Override

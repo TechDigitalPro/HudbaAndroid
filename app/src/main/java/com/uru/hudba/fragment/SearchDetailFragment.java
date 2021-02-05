@@ -1,8 +1,6 @@
 package com.uru.hudba.fragment;
 
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,11 +20,10 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.uru.hudba.App;
+import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.MainActivity;
 import com.uru.hudba.adapter.AlbumAdapter;
-import com.uru.hudba.adapter.HomeAdapter;
 import com.uru.hudba.adapter.TrackAdapter;
 import com.uru.hudba.base.BaseFragment;
 import com.uru.hudba.constant.CommonUtils;
@@ -183,10 +179,14 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
         return rootView;
     }
     public void updateAdapter(int pos, String value){
-        TrackModel tmp = track_list.get(pos);
-        tmp.setFavorite(value);
-        track_list.set(pos, tmp);
-        trackAdapter.notifyDataSetChanged();
+        try {
+            TrackModel tmp = track_list.get(pos);
+            tmp.setFavorite(value);
+            track_list.set(pos, tmp);
+            trackAdapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
     public TrackAdapter getAdapter(){
         return trackAdapter;
@@ -199,126 +199,131 @@ public class SearchDetailFragment extends BaseFragment implements View.OnClickLi
 
         String member_key = App.readSharedSetting(PRE_MEMBER_KEY, "");
         String user_id = App.readSharedSetting(PRE_USER_ID, "");
-        Log.e("member_key:", member_key);
         if (App.isNetworkAvailable(getContext())) {
-            Ion.with(getContext())
-                    .load(GlobalConstants.SEARCH_MAIN)
-                    .setTimeout(CommonUtils.NETWORK_TIME)
-                    .setBodyParameter("memberKey", member_key)
-                    .setBodyParameter("id", search_id)
-                    .setBodyParameter("user_id", user_id)
-                    .setBodyParameter("type", "all")
-                    .asString()
-                    .setCallback(new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            if (e == null) {
-                                try {
-                                    JSONObject resultObj = new JSONObject(result);
-                                    if (resultObj.getString("res").equalsIgnoreCase("success")) {
-                                        JSONObject api_result = resultObj.getJSONObject("api_result");
+            try {
+                Ion.with(getContext())
+                        .load(GlobalConstants.SEARCH_MAIN)
+                        .setTimeout(CommonUtils.NETWORK_TIME)
+                        .setBodyParameter("memberKey", member_key)
+                        .setBodyParameter("id", search_id)
+                        .setBodyParameter("user_id", user_id)
+                        .setBodyParameter("type", "all")
+                        .asString()
+                        .setCallback(new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                if (e == null) {
+                                    try {
+                                        JSONObject resultObj = new JSONObject(result);
+                                        if (resultObj.getString("res").equalsIgnoreCase("success")) {
+                                            JSONObject api_result = resultObj.getJSONObject("api_result");
 
 
-                                        JSONArray trackArray = api_result.getJSONArray("track_list");
-                                        Gson gson = new Gson();
+                                            JSONArray trackArray = api_result.getJSONArray("track_list");
+                                            Gson gson = new Gson();
 
-                                        if (trackArray.length() == 0){
-                                            track_list.clear();
-                                            li_track.setVisibility(View.GONE);
-                                        }else {
-                                            li_track.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < trackArray.length(); i++) {
-                                                TrackModel trackModel = gson.fromJson(trackArray.getJSONObject(i).toString(), TrackModel.class);
-                                                track_list.add(trackModel);
+                                            if (trackArray.length() == 0){
+                                                track_list.clear();
+                                                li_track.setVisibility(View.GONE);
+                                            }else {
+                                                li_track.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < trackArray.length(); i++) {
+                                                    TrackModel trackModel = gson.fromJson(trackArray.getJSONObject(i).toString(), TrackModel.class);
+                                                    track_list.add(trackModel);
+                                                }
+                                                createTrackRV(track_list);
                                             }
-                                            createTrackRV(track_list);
-                                        }
-                                        
 
-                                        JSONArray albumArray = api_result.getJSONArray("album_list");
 
-                                        if (albumArray.length() == 0){
-                                            album_list.clear();
-                                            li_album.setVisibility(View.GONE);
-                                        }else {
-                                            li_album.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < albumArray.length(); i++) {
-                                                String p_id = albumArray.getJSONObject(i).getString("list_id");
-                                                String title = albumArray.getJSONObject(i).getString("title");
-                                                String tracklist = albumArray.getJSONObject(i).getString("tracklist");
-                                                String cover_image = albumArray.getJSONObject(i).getString("cover_image");
-                                                String description = albumArray.getJSONObject(i).getString("artist_name");
-                                                AlbumModel albumModel = new AlbumModel();
-                                                albumModel.setList_id(p_id);
-                                                albumModel.setTitle(title);
-                                                albumModel.setTracklist(tracklist);
-                                                albumModel.setDescription(description);
-                                                albumModel.setCover_image(cover_image);
-                                                album_list.add(albumModel);
+                                            JSONArray albumArray = api_result.getJSONArray("album_list");
+
+                                            if (albumArray.length() == 0){
+                                                album_list.clear();
+                                                li_album.setVisibility(View.GONE);
+                                            }else {
+                                                li_album.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < albumArray.length(); i++) {
+                                                    String p_id = albumArray.getJSONObject(i).getString("list_id");
+                                                    String title = albumArray.getJSONObject(i).getString("title");
+                                                    String tracklist = albumArray.getJSONObject(i).getString("tracklist");
+                                                    String cover_image = albumArray.getJSONObject(i).getString("cover_image");
+                                                    String description = albumArray.getJSONObject(i).getString("artist_name");
+                                                    AlbumModel albumModel = new AlbumModel();
+                                                    albumModel.setList_id(p_id);
+                                                    albumModel.setTitle(title);
+                                                    albumModel.setTracklist(tracklist);
+                                                    albumModel.setDescription(description);
+                                                    albumModel.setCover_image(cover_image);
+                                                    album_list.add(albumModel);
+                                                }
+                                                createAlbumRV(album_list);
                                             }
-                                            createAlbumRV(album_list);
-                                        }
-                                        
-                                        
-                                        JSONArray playlistArray = api_result.getJSONArray("play_list");
-                                        if (playlistArray.length() == 0){
-                                            play_list.clear();
-                                            li_playlist.setVisibility(View.GONE);
-                                        }else {
-                                            li_playlist.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < playlistArray.length(); i++) {
-                                                String list_id = playlistArray.getJSONObject(i).getString("list_id");
-                                                String title = playlistArray.getJSONObject(i).getString("title");
-                                                String cover_image = playlistArray.getJSONObject(i).getString("cover_image");
-                                                String description = playlistArray.getJSONObject(i).getString("user_name");
-                                                String track_list = playlistArray.getJSONObject(i).getString("tracklist");
-                                                AlbumModel topModel = new AlbumModel();
-                                                topModel.setList_id(list_id);
-                                                topModel.setTitle(title);
-                                                topModel.setCover_image(cover_image);
-                                                topModel.setDescription(description);
-                                                topModel.setTracklist(track_list);
-                                                play_list.add(topModel);
+
+
+                                            JSONArray playlistArray = api_result.getJSONArray("play_list");
+                                            if (playlistArray.length() == 0){
+                                                play_list.clear();
+                                                li_playlist.setVisibility(View.GONE);
+                                            }else {
+                                                li_playlist.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < playlistArray.length(); i++) {
+                                                    String list_id = playlistArray.getJSONObject(i).getString("list_id");
+                                                    String title = playlistArray.getJSONObject(i).getString("title");
+                                                    String cover_image = playlistArray.getJSONObject(i).getString("cover_image");
+                                                    String description = playlistArray.getJSONObject(i).getString("user_name");
+                                                    String track_list = playlistArray.getJSONObject(i).getString("tracklist");
+                                                    AlbumModel topModel = new AlbumModel();
+                                                    topModel.setList_id(list_id);
+                                                    topModel.setTitle(title);
+                                                    topModel.setCover_image(cover_image);
+                                                    topModel.setDescription(description);
+                                                    topModel.setTracklist(track_list);
+                                                    play_list.add(topModel);
+                                                }
+                                                createPlaylistRV(play_list);
                                             }
-                                            createPlaylistRV(play_list);
-                                        }
 
 
-                                        JSONArray artistArray = api_result.getJSONArray("artist_list");
-                                        if (artistArray.length() == 0){
-                                            artist_list.clear();
-                                            li_artist.setVisibility(View.GONE);
-                                        }else {
-                                            li_artist.setVisibility(View.VISIBLE);
-                                            for (int i = 0; i < artistArray.length(); i++) {
-                                                String list_id = artistArray.getJSONObject(i).getString("artist_id");
-                                                String title = artistArray.getJSONObject(i).getString("title");
-                                                String cover_image = artistArray.getJSONObject(i).getString("cover_image");
-                                                String track_list = artistArray.getJSONObject(i).getString("tracklist");
-                                                AlbumModel topModel = new AlbumModel();
-                                                topModel.setList_id(list_id);
-                                                topModel.setTitle(title);
-                                                topModel.setCover_image(cover_image);
-                                                topModel.setTracklist(track_list);
-                                                artist_list.add(topModel);
+                                            JSONArray artistArray = api_result.getJSONArray("artist_list");
+                                            if (artistArray.length() == 0){
+                                                artist_list.clear();
+                                                li_artist.setVisibility(View.GONE);
+                                            }else {
+                                                li_artist.setVisibility(View.VISIBLE);
+                                                for (int i = 0; i < artistArray.length(); i++) {
+                                                    String list_id = artistArray.getJSONObject(i).getString("artist_id");
+                                                    String title = artistArray.getJSONObject(i).getString("title");
+                                                    String cover_image = artistArray.getJSONObject(i).getString("cover_image");
+                                                    String track_list = artistArray.getJSONObject(i).getString("tracklist");
+                                                    AlbumModel topModel = new AlbumModel();
+                                                    topModel.setList_id(list_id);
+                                                    topModel.setTitle(title);
+                                                    topModel.setCover_image(cover_image);
+                                                    topModel.setTracklist(track_list);
+                                                    artist_list.add(topModel);
+                                                }
+                                                createArtistRV(artist_list);
                                             }
-                                            createArtistRV(artist_list);
+
+
+                                        } else {
+                                            showErrorMessages(resultObj.getString("err_msg"));
                                         }
-
-
-                                    } else {
-                                        ((MainActivity)getActivity()).showErrorMessages(resultObj.getString("err_msg"));
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
                                     }
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
+                                } else {
+                                    showErrorMessages(R.string.txt_server_error);
                                 }
-                            } else {
-                                ((MainActivity)getActivity()).showErrorMessages(R.string.txt_server_error);
                             }
-                        }
-                    });
+                        });
+            }catch (Exception net){
+                net.printStackTrace();
+            }
+
+
         } else {
-            ((MainActivity)getActivity()).showErrorMessages(R.string.txt_network_error);
+            showErrorMessages(R.string.txt_network_error);
         }
 
     }

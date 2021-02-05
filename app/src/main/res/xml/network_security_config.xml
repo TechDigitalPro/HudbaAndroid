@@ -6,6 +6,7 @@
     <!--See https://developer.android.com/training/articles/security-config.html for more information.-->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">i.scdn.co</domain>
-            <domain includeSubdomains="true">wamusic.net</domain>
+            <domain includeSubdomains="true">hudba.app</domain>
+        <domain includeSubdomains="true">api.hudba.org</domain>
     </domain-config>
 </network-security-config>

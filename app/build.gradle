@@ -8,8 +8,8 @@ android {
         applicationId "com.uru.hudba"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 7
+        versionName "1.0.6"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -38,7 +38,6 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
@@ -50,11 +49,11 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
-
     // network
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.okhttp3:okhttp:4.7.2'
     implementation 'com.koushikdutta.ion:ion:3.0.8'
+    implementation 'org.conscrypt:conscrypt-android:2.2.1'
     //round image
     implementation 'com.makeramen:roundedimageview:2.3.0'
     //video view
@@ -71,13 +70,18 @@ dependencies {
     implementation 'com.karumi:dexter:5.0.0'
     //image upload dlg
     implementation 'com.itlgl:iosdialog:1.0.1'
-    // bottom slideup
+    // bottom slideUp
     implementation 'com.github.andrefrsousa:SuperBottomSheet:2.0.0'
     //download
     implementation 'com.mindorks.android:prdownloader:0.6.0'
     implementation 'org.jsoup:jsoup:1.11.3'
-
-//facebook
+    //facebook
     implementation 'com.facebook.android:facebook-login:8.1.0'
+    //ads
+    implementation 'com.google.android.gms:play-services-ads:19.7.0'
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-runtime:2.2.0"
+    //noinspection LifecycleAnnotationProcessorWithJava8
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.2.0"
 
 }
