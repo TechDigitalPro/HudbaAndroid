@@ -220,6 +220,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     emailDlg.dismiss();
                     if (App.isNetworkAvailable(getApplicationContext())) {
                         CommonUtils.showLoadingDialog(LoginActivity.this);
+                        CommonUtils.hideKeyboard(LoginActivity.this);
                         Ion.with(getApplicationContext())
                                 .load(GlobalConstants.ForgotUrl)
                                 .setTimeout(CommonUtils.NETWORK_TIME)

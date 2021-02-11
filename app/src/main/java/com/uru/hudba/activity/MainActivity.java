@@ -395,22 +395,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            stopPlayer();
-//                            if(cur_track != null){
-//                                if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
-//                                    if(mYouTubePlayer != null){
-//                                        songPause();
-//                                    }
-//                                }else{
-//                                    Intent intent = new Intent(MainActivity.this, NotiService.class);
-//                                    intent.setAction(NotiService.ACTION_PAUSE);
-//                                    startService(intent);
-//                                }
-//                            }
+                            if(cur_track != null){
+                                if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
+                                    if(mYouTubePlayer != null){
+                                        if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING || youtube_tracker.getState() == PlayerConstants.PlayerState.BUFFERING){
+                                            mYouTubePlayer.pause();
+                                        }
+                                    }
+                                    Intent intent = new Intent(MainActivity.this, NotiService.class);
+                                    intent.setAction(NotiService.ACTION_PAUSE);
+                                    startService(intent);
+                                }else{
+                                    Intent intent = new Intent(MainActivity.this, NotiService.class);
+                                    intent.setAction(NotiService.ACTION_PAUSE);
+                                    startService(intent);
+                                }
+                            }
                         }
-                    }, 1000);
+                    }, 1500);
 
-//                    notiPause();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -1212,7 +1215,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     }
     private void stopPlayer(){
         if(cur_track != null){
-            if(TextUtils.isEmpty(cur_track.getFavorite()) || !cur_track.getFavorite().contains("download")){
+            if(TextUtils.isEmpty(cur_track.getFavorite())){
                 if(mYouTubePlayer != null){
                     if(youtube_tracker.getState() == PlayerConstants.PlayerState.PLAYING){
                         mYouTubePlayer.pause();
@@ -1769,7 +1772,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     BroadcastReceiver mActivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             try {
                 boolean nextFlag = intent.getBooleanExtra("next", false);
                 if(nextFlag){
@@ -1797,9 +1799,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             }catch (Exception e){
                 e.printStackTrace();
             }
-
-
-
         }
     };
 

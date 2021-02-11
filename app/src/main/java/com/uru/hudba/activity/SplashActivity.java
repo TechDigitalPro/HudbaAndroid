@@ -17,12 +17,15 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.uru.hudba.application.App;
 import com.uru.hudba.R;
 import com.uru.hudba.activity.intro.IntroActivity;
+
+import java.util.Arrays;
 
 import static com.google.android.gms.ads.appopen.AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT;
 import static com.uru.hudba.constant.GlobalConstants.PRE_MEMBER_KEY;
@@ -116,6 +119,7 @@ public class SplashActivity extends Activity {
                     }
                 };
         AdRequest request = getAdRequest();
+        new RequestConfiguration.Builder().setTestDeviceIds(Arrays.asList("8401E8E9D1A58054CC5D94578030EA9E"));
         AppOpenAd.load(this, AD_UNIT_ID, request, APP_OPEN_AD_ORIENTATION_PORTRAIT, loadCallback);
     }
 

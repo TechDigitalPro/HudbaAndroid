@@ -134,10 +134,20 @@ public class NotiService extends IntentService {
         return START_STICKY;
     }
     private void startNewSong() {
-        if(mediaPlayer != null){
-            mediaPlayer.pause();
+        try {
+            if(mediaPlayer != null){
+                mediaPlayer.pause();
+                Constant.isPlayed = false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
             Constant.isPlayed = false;
+//            Intent intent = new Intent("com.uru.hdubaActivity");
+//            intent.putExtra("prev", true);
+//            sendBroadcast(intent);
+            return;
         }
+
         isNewSong = true;
         String url;
         try {
@@ -217,14 +227,16 @@ public class NotiService extends IntentService {
                 if(mediaPlayer != null){
                     if(mediaPlayer.isPlaying()){
                         mediaPlayer.pause();
-                                    Constant.isPlayed = false;
+                        Constant.isPlayed = false;
                     }else{
                         mediaPlayer.start();
-                                  Constant.isPlayed = true;
+                        Constant.isPlayed = true;
                     }
                 }
             }catch (Exception e){
                 e.printStackTrace();
+                Constant.isPlayed = false;
+                return;
             }
 
             updateNotiPlay(false);
